@@ -26,7 +26,7 @@ public class Experience {
 
     @ManyToOne
     @JsonIgnore
-    private Users expUser;
+    private UserProfile expUser;
 
     @ManyToOne
     @JsonIgnore

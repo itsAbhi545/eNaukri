@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.Dto.UserSkillDto;
 import com.chicmic.eNaukri.model.Skills;
+import com.chicmic.eNaukri.model.UserProfile;
 import com.chicmic.eNaukri.model.UserSkills;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.SkillsRepo;
@@ -23,12 +24,13 @@ public class SkillsService {
         Long userId = dto.getUserId();
         List<Long> skillIds = dto.getSkillIds();
         Users user = usersRepo.findByUserId(userId);
+        UserProfile userProfile = user.getUserProfile();
         List<Skills> selectedSkills = skillsRepo.findAllById(skillIds);
         for (Skills skill : selectedSkills) {
             UserSkills userSkills=new UserSkills();
-            userSkills.setUser(user);
+            userSkills.setUserProfile(userProfile);
             userSkills.setSkills(skill);
-            user.getUserSkillsList().add(userSkills);
+            user.getUserProfile().getUserSkillsList().add(userSkills);
             userSkillsRepo.save(userSkills);
         }
         usersRepo.save(user);

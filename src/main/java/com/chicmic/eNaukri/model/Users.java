@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -43,13 +45,18 @@ public class Users {
     @Pattern(regexp = RegEx.PASSWORD,message = "")
     @NotNull
     private String password;
-    private String otp;
-    private boolean isVerified;
-    @UuidGenerator
-    private String uuid;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
     @NotNull
     private String phoneNumber;
+    private String currentCompany;
+    private String cvPath;
+    private String bio;
+    private String ppPath;
+    private String otp;
+    @UuidGenerator
+    private String uuid;
+    private String link;
+    private boolean isVerified;
     private boolean enableNotification;
 
     //mappings
@@ -62,5 +69,16 @@ public class Users {
     @OneToMany(cascade = CascadeType.ALL,fetch=FetchType.EAGER,mappedBy = "userr")
     @JsonIgnore
     private Set<UserToken> userTokenSet=new HashSet<>();
+
+    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private  UserProfile userProfile;
+    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private  Employer employerProfile;
+
+
 
 }

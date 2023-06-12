@@ -23,5 +23,5 @@ public class Premium {
     @UpdateTimestamp
     private LocalDateTime renewedOn;
     @OneToOne
-    private Users userSubscription;
+    private UserProfile userSubscription;
 }

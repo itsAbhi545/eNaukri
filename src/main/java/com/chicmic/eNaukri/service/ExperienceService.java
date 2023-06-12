@@ -23,7 +23,7 @@ public class ExperienceService {
     private final UserExperienceRepo userExperienceRepo;
     public void addExperience(Long userId, UserExperienceDto dto){
         Users user=usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        boolean hasDuplicateJoinedDate = user.getExperienceList().stream()
+        boolean hasDuplicateJoinedDate = user.getUserProfile().getExperienceList().stream()
                 .anyMatch(e -> e.getJoinedOn().equals(dto.getJoinedOn()));
 
         if (hasDuplicateJoinedDate) {
@@ -31,7 +31,7 @@ public class ExperienceService {
         }
 
         // Check if the user already has a current company
-        boolean hasCurrentCompany = user.getExperienceList().stream()
+        boolean hasCurrentCompany = user.getUserProfile().getExperienceList().stream()
                 .anyMatch(Experience::isCurrentlyWorking);
 
         if (dto.isCurrentlyWorking() && hasCurrentCompany) {
@@ -40,7 +40,7 @@ public class ExperienceService {
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         Experience experience = mapper.convertValue(dto, Experience.class);
         experience.setExCompany(companyRepo.getById(dto.getCompanyId()));
-        experience.setExpUser(user);
+        experience.setExpUser(user.getUserProfile());
         UserExperience userExperience=new UserExperience();
         userExperience.setExperience(experience);
         userExperience.setUser(user);
