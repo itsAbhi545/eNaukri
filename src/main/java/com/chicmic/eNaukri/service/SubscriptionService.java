@@ -36,8 +36,8 @@ public class SubscriptionService {
         PaymentIntent confirmIntent = intent.confirm();
         // Check if the payment is successful
         if ("succeeded".equals(confirmIntent.getStatus())) {
-            user.setHasPremium(true);
-            premium.setUserSubscription(user);
+            user.getUserProfile().setHasPremium(true);
+            premium.setUserSubscription(user.getUserProfile());
             premiumRepo.save(premium);
             return intent.getInvoice();
         }

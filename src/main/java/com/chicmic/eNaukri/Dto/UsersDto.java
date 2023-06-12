@@ -26,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
     private String email;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "phone needs to be 10 digits")
     private String phoneNumber;
-    private String currentCompany;
-    private String bio;
+    private String password;
+//    private String currentCompany;
+//    private String bio;
 
 }

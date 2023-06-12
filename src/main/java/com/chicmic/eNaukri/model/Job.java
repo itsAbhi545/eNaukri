@@ -47,4 +47,6 @@ public class Job {
     @JsonIgnore
     private Company postFor;
 
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private Employer employer;
 }

@@ -4,9 +4,7 @@ import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -16,7 +14,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -34,7 +31,7 @@ public class JobService {
     private final JobSkillsRepo jobSkillsRepo;
     private final UserSkillsRepo userSkillsRepo;
     private final SkillsRepo skillsRepo;
-    private final UserCompanyRepo userCompanyRepo;
+
     @PersistenceContext
     private EntityManager entityManager;
     UsersService usersService;
@@ -45,8 +42,8 @@ public class JobService {
         Job newJob = mapper.convertValue(job, Job.class);
         newJob.setActive(true);
         newJob.setPostedOn(LocalDate.now());
-        System.out.println("\u001B[33m"+user.getCurrentCompany()+"\u001B[0m");
-        if(user.getCurrentCompany().equals(postedFor)){
+        System.out.println("\u001B[33m"+user.getUserProfile().getCurrentCompany()+"\u001B[0m");
+        if(user.getUserProfile().getCurrentCompany().equals(postedFor)){
             System.out.println("inside if"+companyRepo.findByCompanyName(postedFor.trim()).getCompanyName());
             newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
         }
@@ -115,7 +112,7 @@ public class JobService {
         } );
         Collection<String> usersCollection=new HashSet<>();
         usersSet.forEach(userSkills ->{
-            if(userSkills.getUser().isEnableNotification())usersCollection.add(userSkills.getUser().getEmail());
+            if(userSkills.getUserProfile().getUsers().isEnableNotification())usersCollection.add(userSkills.getUserProfile().getUsers().getEmail());
         } );
         return usersCollection;
     }
@@ -136,7 +133,7 @@ public class JobService {
                   userSet.addAll(userSkillsRepo.findBySkills(jobSkillss.getJobSkill()));
         });
         List<Users> usersSet=new ArrayList<>();
-        userSet.forEach(userSkills -> usersSet.add(userSkills.getUser()));
+        userSet.forEach(userSkills -> usersSet.add(userSkills.getUserProfile().getUsers()));
         System.out.println(usersSet);
         return usersSet;
     }

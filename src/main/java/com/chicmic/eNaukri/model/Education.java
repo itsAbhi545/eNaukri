@@ -29,5 +29,5 @@ public class Education {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private Users edUser;
+    private UserProfile edUser;
 }

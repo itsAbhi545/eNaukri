@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -31,7 +33,9 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
     @NotNull
     private String fullName;
@@ -43,50 +47,37 @@ public class Users {
     @Pattern(regexp = RegEx.PASSWORD,message = "")
     @NotNull
     private String password;
+    private String otp;
+    @Column(columnDefinition = "boolean default false")
+    private boolean isVerified;
+    @UuidGenerator
+    private String uuid;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
     @NotNull
     private String phoneNumber;
-    private String currentCompany;
-    private String cvPath;
-    private String bio;
-    private String ppPath;
-    private String otp;
-    @UuidGenerator
-    private String uuid;
-    private String link;
-    private boolean isVerified;
+    @Column(columnDefinition = "boolean default true")
     private boolean enableNotification;
-    private boolean hasPremium;
 
-//mappings
+    //mappings
 
     @OneToOne(mappedBy = "userLinks", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private SocialLink socialLink;
-    @OneToOne(mappedBy = "userSubscription", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private Premium premium;
-    @OneToOne(mappedBy = "userPreferences", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private Preference preference;
-
-    @OneToMany(mappedBy = "edUser", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private List<Education> educationList=new ArrayList<>();
-    boolean success =Hibernate.isInitialized(educationList);
-    @OneToMany(mappedBy = "applicantId", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    private List<Application> applicationList=new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch =FetchType.EAGER)
-    private List<UserSkills> userSkillsList=new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,fetch=FetchType.EAGER,mappedBy = "userr")
     @JsonIgnore
     private Set<UserToken> userTokenSet=new HashSet<>();
 
-    @OneToMany(mappedBy = "expUser",orphanRemoval = true, cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    private List<Experience> experienceList=new ArrayList<>();
+    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private  UserProfile userProfile;
+    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private  Employer employerProfile;
+
+
+
 }

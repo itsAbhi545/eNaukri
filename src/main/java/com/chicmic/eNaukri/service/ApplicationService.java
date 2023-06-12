@@ -59,7 +59,7 @@ public class ApplicationService {
                 Application jobApplication = new Application();
                 BeanUtils.copyProperties(application, jobApplication);
                 jobApplication.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
-                jobApplication.setApplicantId(user);
+//                jobApplication.setApplicantId(user);
                 jobApplication.setJobId(job);
                 applicationRepo.save(jobApplication);
                 job.setNumApplicants(job.getNumApplicants() + 1);
@@ -87,7 +87,7 @@ public class ApplicationService {
     }
     public List<Application> viewApplications(Long userId){
         Users user = usersRepo.findById(userId).get();
-        List<Application> applications=user.getApplicationList();
+        List<Application> applications=user.getUserProfile().getApplicationList();
         return applications;
     }
     public int getNumApplicantsForJob(Long jobId) {

@@ -18,5 +18,5 @@ public class Preference {
     private Long yoe;
     private String remoteHybridOnsite;
     @OneToOne
-    private Users userPreferences;
+    private UserProfile userPreferences;
 }

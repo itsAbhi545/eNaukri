@@ -19,7 +19,7 @@ public class UserSkills {
 
     @ManyToOne
     @JsonIgnore
-    private Users user;
+    private UserProfile userProfile;
 
     @ManyToOne
     @JsonIgnore
