@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Form</title>
+</head>
+<body>
+<h1>Registration Form</h1>
+<form id="signup" action="/signup" method="POST" enctype="multipart/form-data">
+    <label for="fullName">Full Name:</label>
+    <input type="text" id="fullName" name="fullName" required><br><br>
+
+    <label for="bio">Bio:</label>
+    <textarea id="bio" name="bio" rows="4" cols="50"></textarea><br><br>
+
+    <label for="skills">Skills:</label>
+    <input type="text" id="skills" name="skills"><br><br>
+
+    <label for="phoneNumber">Phone:</label>
+    <input type="tel" id="phoneNumber" name="phoneNumber"><br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label for="imageFile">Profile Image:</label>
+    <input type="file" id="imageFile" name="imgFile"><br><br>
+
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email"><br><br>
+
+    <label for="resumeFile">Resume:</label>
+    <input type="file" id="resumeFile" name="resumeFile"><br><br>
+
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>
