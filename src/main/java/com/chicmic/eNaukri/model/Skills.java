@@ -25,5 +25,6 @@ public class Skills {
 
     @OneToMany(mappedBy = "jobSkill",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<JobSkills> jobSkillsList=new ArrayList<>();
-
+    @ManyToOne
+    JobCategories jobCategories;
 }

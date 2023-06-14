@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
@@ -14,6 +15,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -31,30 +33,22 @@ public class JobService {
     private final JobSkillsRepo jobSkillsRepo;
     private final UserSkillsRepo userSkillsRepo;
     private final SkillsRepo skillsRepo;
+    private final EmployerRepo employerRepo;
 
     @PersistenceContext
     private EntityManager entityManager;
     UsersService usersService;
-    @Async public void saveJob(JobDto job, Long companyId) {
+    @Async public void saveJob(JobDto job,Long empId, Long companyId) {
         String postedFor=companyRepo.findById(companyId).get().getCompanyName();
-        Users user=usersRepo.findById(job.getUserId()).get();
-        ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
-        Job newJob = mapper.convertValue(job, Job.class);
-        newJob.setActive(true);
-        newJob.setPostedOn(LocalDate.now());
-        System.out.println("\u001B[33m"+user.getUserProfile().getCurrentCompany()+"\u001B[0m");
-        if(user.getUserProfile().getCurrentCompany().equals(postedFor)){
-            System.out.println("inside if"+companyRepo.findByCompanyName(postedFor.trim()).getCompanyName());
-            newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+        Employer employer=employerRepo.findById(empId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+        if (!employer.getEmployerCompany().getCompanyName().equals(postedFor)){
+            throw new ApiException(HttpStatus.FORBIDDEN,"Employer doesn't belong to this company");
         }
-//        else if(user.getCurrentCompany()==null){
-//            newJob.setPostFor();
-//        }
+        else{
+        Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-
         for (String jobSkillId : job.getSkillsList()) {
             Long skillId = Long.valueOf(jobSkillId);
-//            System.out.println("inside service job"+skillId);
             Skills skill=skillsRepo.findById(skillId).orElse(null);
             JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
             if (skill != null) {
@@ -66,8 +60,10 @@ public class JobService {
         jobRepo.save(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
         sendEmailNotifications(usersList,newJob);
+        }
     }
-    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
+    public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn,
+                                                  String remoteHybridOnsite,Integer yoe,Integer salary) {
         CriteriaBuilder builder=entityManager.getCriteriaBuilder();
         CriteriaQuery<Job> criteriaQuery=builder.createQuery(Job.class);
         Root<Job> root=criteriaQuery.from(Job.class);
@@ -93,6 +89,8 @@ public class JobService {
         }
         Predicate workTypeQuery=(!StringUtils.isEmpty(remoteHybridOnsite))?builder.equal(root.get("remoteHybridOnsite"),remoteHybridOnsite):builder.like(root.get("remoteHybridOnsite"),"%%");
         Predicate activeJobs=builder.isTrue(root.get("active"));
+        Predicate yoeQuery = (yoe != null) ? builder.equal(root.get("minYoe"), yoe) : builder.conjunction();
+        Predicate salaryQuery = (salary != null) ? builder.between(root.get("minSalary"), salary, root.get("maxSalary")) : builder.conjunction();
 
         //building query
         criteriaQuery.where(builder.or(queryInTitle,queryInDesc),locationQuery,jobTypeQuery,postedOnQuery,workTypeQuery,activeJobs);
@@ -116,12 +114,12 @@ public class JobService {
         } );
         return usersCollection;
     }
-    public void setStatus(Long jobId, boolean active) {
-        Optional<Job> job = jobRepo.findById(jobId);
-        if (job.isPresent()) {
-            Job job1 = job.get();
-            job1.setActive(active);
-            jobRepo.save(job1);
+    public void setStatus(Long jobId, boolean active,Long empId) {
+        Employer employer=employerRepo.findById(empId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such employer exists"));
+        Job job = jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such job exists"));
+        if(employer.getName().equals(job.getEmployer().getName())){
+            job.setActive(active);
+            jobRepo.save(job);
         }
     }
 
@@ -151,8 +149,12 @@ public class JobService {
                 String to = users1.getEmail();
                 String subject = "Matching job";
             if (users1.isEnableNotification()) {
-                usersService.sendEmailForOtp(to, subject, body);
+                usersService.sendEmail(to, subject, body);
             }
         }
+    }
+    public List<Application> getListOfApplicants(Long jobId){
+        Job job=jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job doesn't exist"));
+        return job.getApplicationList();
     }
 }

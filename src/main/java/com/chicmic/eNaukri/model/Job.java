@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,9 +32,12 @@ public class Job {
     private String jobType;
     private String remoteHybridOnsite;
     private String jobDesc;
+    @CreationTimestamp
     private LocalDate postedOn;
+    @UpdateTimestamp
     private LocalDate updatedOn;
     private LocalDate expiresAt;
+    @Column(columnDefinition = "boolean default true")
     private boolean active;
     private int numApplicants;
 
@@ -49,4 +54,8 @@ public class Job {
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Employer employer;
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    private List<JobCategories> jobCategories=new ArrayList<>();
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    private List<UserProfile> invitedUsers=new ArrayList<>();
 }

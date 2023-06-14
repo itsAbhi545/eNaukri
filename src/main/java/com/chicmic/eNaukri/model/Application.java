@@ -1,6 +1,8 @@
 package com.chicmic.eNaukri.model;
 
+import com.chicmic.eNaukri.Dto.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,6 @@ public class Application {
     private String fullName;
     private String email;
     private String phoneNumber;
-
     @ManyToOne
     @JsonIgnore
     private UserProfile applicantId;
@@ -32,4 +33,8 @@ public class Application {
     @ManyToOne
     @JsonIgnore
     private Job jobId;
+    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    private ApplicationStatus applicationStatus;
 }

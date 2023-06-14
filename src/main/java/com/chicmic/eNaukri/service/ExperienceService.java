@@ -46,13 +46,5 @@ public class ExperienceService {
         userExperience.setUser(user);
         experienceRepo.save(experience);
         userExperienceRepo.save(userExperience);
-//        UserCompany userCompany=new UserCompany();
-//        userCompany.setCompanyUsers(user);
-//        userCompany.setJoinedAt(experience.getJoinedOn());
-//        userCompany.setLeftAt(experience.getEndedOn());
-//        userCompany.setUsersCompany(experience.getExCompany());
-//        userCompany.setRoleDesc(experience.getRoleDesc());
-//        userCompany.setCurrentlyWorking(experience.isCurrentlyWorking());
-//        userCompany.setEmployeeRole(experience.getRole());
     }
 }

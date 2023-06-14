@@ -7,13 +7,11 @@ import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.SocialLink;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
-import com.chicmic.eNaukri.service.CompanyService;
-import com.chicmic.eNaukri.service.JobService;
-import com.chicmic.eNaukri.service.SocialLinkService;
-import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,6 +25,7 @@ public class CompanyController {
     private final JobRepo jobRepo;
     private final CompanyRepo companyRepo;
     private final CompanyService companyService;
+    private final ApplicationService applicationService;
     @Autowired JobService jobService;
     SocialLinkService linkService;
 
@@ -38,14 +37,14 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("{id}/postJob")
-    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long id){
-        jobService.saveJob(job,id);
+    @PostMapping("{companyId}/{empId}/postJob")
+    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long companyId, @PathVariable Long empId){
+        jobService.saveJob(job, companyId, empId);
         return ResponseEntity.ok("Job successfully posted");
     }
-    @PutMapping("{id}/setStatus")
-    public ResponseEntity<String> setStatus(@PathVariable Long id,boolean active){
-        jobService.setStatus(id,active);
+    @PutMapping("{empId}/{jobId}/setStatus")
+    public ResponseEntity<String> setJobStatus(@PathVariable Long jobId,@PathVariable Long empId, boolean active){
+        jobService.setStatus(jobId,active,empId);
         return ResponseEntity.ok("Status changed");
     }
     @PostMapping("{id}/addSocialLinks")

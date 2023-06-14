@@ -48,9 +48,10 @@ public class SecurityConfig  {
 //        authenticationFilter.setFilterProcessesUrl("/company-login");
 
     //csrf+session
-        http.csrf().disable();
+        http.csrf((csrf) -> csrf.disable());
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     //permits
+        http.authorizeHttpRequests().requestMatchers("/admin/**").hasRole("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
         http.authorizeHttpRequests().anyRequest().permitAll();
 

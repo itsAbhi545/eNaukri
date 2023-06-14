@@ -1,8 +1,22 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class UserProfile {
     @Id
-    @GeneratedValue(strategy =GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String currentCompany;
     private String cvPath;
@@ -36,6 +50,7 @@ public class UserProfile {
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Users users;
-
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    private List<Job> invitedJobs=new ArrayList<>();
 
 }

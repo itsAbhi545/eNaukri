@@ -118,4 +118,9 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid OTP. User verification failed.");
         }
     }
+    @PostMapping("/{userId}/createProfile")
+    public ResponseEntity<String> makeProfile(@PathVariable Long userId,UserProfile dto){
+        usersService.createProfile(dto,userId);
+        return ResponseEntity.ok("profile set");
+    }
 }

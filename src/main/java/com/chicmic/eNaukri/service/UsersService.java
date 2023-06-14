@@ -1,7 +1,12 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.Preference;
+import com.chicmic.eNaukri.model.UserProfile;
 import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.repo.PreferenceRepo;
+import com.chicmic.eNaukri.repo.UserProfileRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
@@ -10,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
@@ -31,6 +38,8 @@ public class UsersService {
     private final UsersRepo usersRepo;
     private final JavaMailSender javaMailSender;
     private final FileUploadUtil fileUploadUtil;
+    private final UserProfileRepo userProfileRepo;
+    private final PreferenceRepo preferenceRepo;
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
@@ -41,12 +50,7 @@ public class UsersService {
 
 
     public Users register(Users newUser) {
-//        log.error("user = " + newUser.getEmployerProfile());
-
         String uuid= UUID.randomUUID().toString();
-//        Users newUser = CustomObjectMapper.convertDtoToObject(dto,Users.class);
-//        newUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
-//        newUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         newUser.setUuid(uuid);
         // Generate OTP
         String otp =Integer.toString(new Random().nextInt(999999));
@@ -56,10 +60,12 @@ public class UsersService {
         newUser.setPassword(passwordEncoder().encode(newUser.getPassword()));
         newUser.setOtp(otp);
         usersRepo.save(newUser);
+//        sendEmail(newUser.getEmail(),subject ,message);
         return newUser;
     }
 
-    @Async public void sendEmailForOtp(String to, String subject, String body) {
+    @Async
+    public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("harmanjyot.singh@chicmic.co.in");
         message.setTo(to);
@@ -93,5 +99,15 @@ public class UsersService {
         existingUser.getUserProfile().setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
+    }
+    public void createProfile(UserProfile dto,Long userId){
+        Users user = usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+        user.setUserProfile(dto);
+    }
+    public Preference createPreferences(Principal principal, Preference preference){
+        Users user=usersRepo.findByEmail(principal.getName());
+        Preference preference1=preferenceRepo.save(preference);
+        preference1.setUserPreferences(user.getUserProfile());
+        return preference1;
     }
 }

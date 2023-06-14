@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data public class JobDto {
-    private Long userId;
+
     private String jobTitle;
     private String jobDesc;
     private boolean active;

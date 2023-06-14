@@ -2,15 +2,10 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.ApplicationDto;
-import com.chicmic.eNaukri.model.Application;
+import com.chicmic.eNaukri.Dto.Status;
+import com.chicmic.eNaukri.model.*;
 
-import com.chicmic.eNaukri.model.Company;
-import com.chicmic.eNaukri.model.Job;
-import com.chicmic.eNaukri.model.Users;
-import com.chicmic.eNaukri.repo.ApplicationRepo;
-import com.chicmic.eNaukri.repo.CompanyRepo;
-import com.chicmic.eNaukri.repo.JobRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +38,9 @@ public class ApplicationService {
     private final UsersRepo usersRepo;
     private final JobRepo jobRepo;
     private final JavaMailSender javaMailSender;
+    private final EmployerRepo employerRepo;
+    private final ApplicationStatusRepo statusRepo;
+    private final UsersService usersService;
     public void applyForJob(ApplicationDto application, Long userId, Long jobId)
             throws IOException, MessagingException, ApiException {
 
@@ -95,5 +93,19 @@ public class ApplicationService {
         if(job==null)
             throw new ApiException(HttpStatus.CONFLICT,"not found");
         return job.getNumApplicants();
+    }
+    public void changeStatus(Long appId, Long empId,Long statusId){
+        Application application= applicationRepo.findById(appId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such application exists or has been deleted"));
+        Employer employer= employerRepo.findById(empId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such employer exists"));
+        Job job = jobRepo.findJobByJobId(application.getJobId().getJobId());
+        ApplicationStatus status= statusRepo.findById(statusId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such application status exists"));
+        if(job.getEmployer().equals(employer)){
+            application.setApplicationStatus(status);
+            String to=application.getEmail();
+            String subject="Regarding status of your application for "+job.getJobTitle();
+            String body="Your application for "+job.getJobTitle()+",at "+job.getPostFor().getCompanyName()+
+                    " has been "+status.getMessage();
+            usersService.sendEmail(to,subject,body);
+        }
     }
 }

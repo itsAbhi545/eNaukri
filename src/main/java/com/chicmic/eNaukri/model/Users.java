@@ -33,7 +33,9 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
     @NotNull
     private String fullName;
@@ -45,18 +47,15 @@ public class Users {
     @Pattern(regexp = RegEx.PASSWORD,message = "")
     @NotNull
     private String password;
+    private String otp;
+    @Column(columnDefinition = "boolean default false")
+    private boolean isVerified;
+    @UuidGenerator
+    private String uuid;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
     @NotNull
     private String phoneNumber;
-    private String currentCompany;
-    private String cvPath;
-    private String bio;
-    private String ppPath;
-    private String otp;
-    @UuidGenerator
-    private String uuid;
-    private String link;
-    private boolean isVerified;
+    @Column(columnDefinition = "boolean default true")
     private boolean enableNotification;
 
     //mappings
@@ -78,7 +77,4 @@ public class Users {
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private  Employer employerProfile;
-
-
-
 }

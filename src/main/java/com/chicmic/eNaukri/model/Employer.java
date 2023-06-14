@@ -27,7 +27,7 @@ public class Employer {
     private String ppPath;
 
     @Column(columnDefinition = "boolean default false")
-    private Integer isApproved;
+    private boolean isApproved;
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
@@ -37,7 +37,5 @@ public class Employer {
     private Company employerCompany;
     @OneToMany(mappedBy = "employer", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Job> jobList=new ArrayList<>();
-
-
 
 }
