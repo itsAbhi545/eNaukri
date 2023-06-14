@@ -65,7 +65,7 @@ public class ApplicationService {
                 job.setNumApplicants(job.getNumApplicants() + 1);
                 jobRepo.save(job);
                 String jobTitle = job.getJobTitle();
-                String company = job.getPostFor().getCompanyName();
+                String company = job.getPostFor().getName();
                 sendEmailOnApplication(user.getEmail(), jobTitle, company);
             }
         }

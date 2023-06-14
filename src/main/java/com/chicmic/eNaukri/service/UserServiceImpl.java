@@ -49,7 +49,8 @@ public class UserServiceImpl implements UserDetailsService {
     private final SkillsRepo skillsRepo;
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
-    private final JobSkillsRepo jobSkillsRepo;
+    private final RolesService rolesService;
+
     @PersistenceContext
     private EntityManager entityManager;
     @Autowired
@@ -96,14 +97,15 @@ public class UserServiceImpl implements UserDetailsService {
         if(user.isVerified()==false){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
         }
+        UserRole userRole = rolesService.findUserRoleByUser(user);
         Collection<Authority> authorities=new ArrayList<>();
-        authorities.add(new Authority("USER"));
+        authorities.add(new Authority("ROLE_" + userRole.getRoleId().getRoleName()));
         return new User(user.getEmail(),user.getPassword(),authorities);
     }
 
     public String findCurrentCompany(Long id) {
         Users users=usersRepo.findById(id).get();
-       return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getCompanyName();
+       return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getName();
     }
 
     public void changeAlerts(Long id, boolean b) {

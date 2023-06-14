@@ -12,11 +12,11 @@ import java.nio.file.Paths;
 @Component
 public class FileUploadUtil {
     @Value("${my.cvPath.string}")
-    String resumePath;
+   public static  String resumePath;
     @Value("${my.imagePath.string}")
-    String imagePath;
+   public  static String imagePath;
 
-    public String resumeUpload(MultipartFile resumeFile) throws IOException {
+    public static  String resumeUpload(MultipartFile resumeFile) throws IOException {
         String cvPath = null;
         if (!resumeFile.isEmpty()) {
             String resumeFolder = resumePath;
@@ -28,7 +28,7 @@ public class FileUploadUtil {
         return cvPath;
     }
 
-    public String imageUpload(MultipartFile resumeFile) throws IOException {
+    public static String imageUpload(MultipartFile resumeFile) throws IOException {
         String ppPath = null;
         if (!resumeFile.isEmpty()) {
             String imgFolder = imagePath;
@@ -39,5 +39,16 @@ public class FileUploadUtil {
         }
         return ppPath;
     }
+//    public  static String imageUpload(MultipartFile resumeFile, String Path) throws IOException {
+//        String ppPath = null;
+//        if (!resumeFile.isEmpty()) {
+//            String imgFolder = Path;
+//            byte[] imgFileBytes = resumeFile.getBytes();
+//            Path imgPath = Paths.get(imgFolder + resumeFile.getOriginalFilename());
+//            Files.write(imgPath, imgFileBytes);
+//            ppPath = "/static/assets/files" + resumeFile.getOriginalFilename();
+//        }
+//        return ppPath;
+//    }
 }
 

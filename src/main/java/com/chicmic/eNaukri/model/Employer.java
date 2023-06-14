@@ -7,7 +7,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,23 +22,20 @@ public class Employer {
     @Id
     @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
-    private String name;
-
-    private String company;
 
     private String ppPath;
 
     @Column(columnDefinition = "boolean default false")
-    private Integer isApproved;
+    private Boolean isApproved;
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Users users;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonIgnore
     private Company employerCompany;
     @OneToMany(mappedBy = "employer", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<Job> jobList=new ArrayList<>();
+    private Set<Job> jobList=new HashSet<>();
 
 
 

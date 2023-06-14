@@ -48,11 +48,11 @@ public class SecurityConfig  {
 //        authenticationFilter.setFilterProcessesUrl("/company-login");
 
     //csrf+session
-        http.csrf().disable();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.csrf(csrf->csrf.disable());
+        http.sessionManagement(sessionManagement->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     //permits
-        http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
-        http.authorizeHttpRequests().anyRequest().permitAll();
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/user/**","/company/**").hasAnyAuthority("USER"));
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.anyRequest().permitAll());
 
     //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);

@@ -1,12 +1,17 @@
 package com.chicmic.eNaukri.Dto;
 
+import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.model.JobSkills;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data public class JobDto {
+@Data
+@Builder
+@TrimAll
+public class JobDto {
     private Long userId;
     private String jobTitle;
     private String jobDesc;
@@ -17,5 +22,9 @@ import java.util.List;
     private LocalDate postedOn;
     private LocalDate updatedOn;
     private LocalDate expiresAt;
+    private Float  minYear;
+    private Float maxYear;
+    private Float minSalary;
+    private Float maxSalary;
     private List<String> skillsList;
 }

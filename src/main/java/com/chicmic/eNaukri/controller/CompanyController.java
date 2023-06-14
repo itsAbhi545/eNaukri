@@ -38,9 +38,9 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("{id}/postJob")
-    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long id){
-        jobService.saveJob(job,id);
+    @PostMapping("{companyId}/{empId}/postJob")
+    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long companyId, @PathVariable Long empId){
+        jobService.saveJob(job, companyId, empId);
         return ResponseEntity.ok("Job successfully posted");
     }
     @PutMapping("{id}/setStatus")

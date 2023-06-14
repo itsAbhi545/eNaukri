@@ -86,7 +86,7 @@ public class TrimValidator  extends StdConverter<String, String> implements Conv
                 .count();
 
 
-//        System.out.println("\u001B[35m" + messages + "\u001B[0m");
+        System.out.println("\u001B[35m" + messages + "\u001B[0m");
 
 
         context.disableDefaultConstraintViolation();

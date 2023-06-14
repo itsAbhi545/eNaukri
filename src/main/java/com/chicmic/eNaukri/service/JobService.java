@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
@@ -14,6 +15,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -31,41 +33,34 @@ public class JobService {
     private final JobSkillsRepo jobSkillsRepo;
     private final UserSkillsRepo userSkillsRepo;
     private final SkillsRepo skillsRepo;
+    private final EmployerRepo employerRepo;
 
     @PersistenceContext
     private EntityManager entityManager;
     UsersService usersService;
-    @Async public void saveJob(JobDto job, Long companyId) {
-        String postedFor=companyRepo.findById(companyId).get().getCompanyName();
-        Users user=usersRepo.findById(job.getUserId()).get();
-        ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
-        Job newJob = mapper.convertValue(job, Job.class);
-        newJob.setActive(true);
-        newJob.setPostedOn(LocalDate.now());
-        System.out.println("\u001B[33m"+user.getUserProfile().getCurrentCompany()+"\u001B[0m");
-        if(user.getUserProfile().getCurrentCompany().equals(postedFor)){
-            System.out.println("inside if"+companyRepo.findByCompanyName(postedFor.trim()).getCompanyName());
-            newJob.setPostFor(companyRepo.findByCompanyName(postedFor.trim()));
+    @Async public void saveJob(JobDto job,Long empId, Long companyId) {
+        String postedFor=companyRepo.findById(companyId).get().getName();
+        Employer employer=employerRepo.findById(empId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+        if (!employer.getEmployerCompany().getName().equals(postedFor)){
+            throw new ApiException(HttpStatus.FORBIDDEN,"Employer doesn't belong to this company");
         }
-//        else if(user.getCurrentCompany()==null){
-//            newJob.setPostFor();
-//        }
-        List<JobSkills> newJobSkillList = new ArrayList<>();
-
-        for (String jobSkillId : job.getSkillsList()) {
-            Long skillId = Long.valueOf(jobSkillId);
-//            System.out.println("inside service job"+skillId);
-            Skills skill=skillsRepo.findById(skillId).orElse(null);
-            JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
-            if (skill != null) {
-                newJobSkillList.add(jobSkill);
+        else{
+            Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
+            List<JobSkills> newJobSkillList = new ArrayList<>();
+            for (String jobSkillId : job.getSkillsList()) {
+                Long skillId = Long.valueOf(jobSkillId);
+                Skills skill=skillsRepo.findById(skillId).orElse(null);
+                JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
+                if (skill != null) {
+                    newJobSkillList.add(jobSkill);
+                }
             }
+            System.out.println(newJobSkillList.get(0)+"job skill selected");
+            newJob.setJobSkillsList(newJobSkillList);
+            jobRepo.save(newJob);
+            List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
+            sendEmailNotifications(usersList,newJob);
         }
-        System.out.println(newJobSkillList.get(0)+"job skill selected");
-        newJob.setJobSkillsList(newJobSkillList);
-        jobRepo.save(newJob);
-        List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
-        sendEmailNotifications(usersList,newJob);
     }
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn, String remoteHybridOnsite) {
         CriteriaBuilder builder=entityManager.getCriteriaBuilder();

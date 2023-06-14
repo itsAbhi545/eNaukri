@@ -33,6 +33,11 @@ public class Job {
     private LocalDate postedOn;
     private LocalDate updatedOn;
     private LocalDate expiresAt;
+    private Float  minYear;
+    private Float maxYear;
+    private Float minSalary;
+    private Float maxSalary;
+
     private boolean active;
     private int numApplicants;
 

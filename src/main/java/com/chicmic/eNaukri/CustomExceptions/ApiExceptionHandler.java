@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.CustomExceptions;
 
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ApiException.class})
@@ -39,12 +41,18 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        System.out.println("\u001B[38m"  +"This methods gets Called!!"+ "\u001B[0m");
+        log.warn("\u001B[38m"  +"This methods gets Called!!"+ "\u001B[0m");
         List<String> errors = new ArrayList<String>();
+
+        System.out.println("\u001B[31m" + ex.getBindingResult().getAllErrors()+"\u001B[0m" );
         for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
+            System.out.println("\u001B[31m" + ex.getBindingResult()+"\u001B[0m" );
             errors.add(error.getDefaultMessage());
             //errors.add(error.getField() + ": " + error.getDefaultMessage());
         }
+        errors.addAll(List.of(ex.getBindingResult().getAllErrors().get(0).getDefaultMessage().split(",")));
+
+
         ApiError error = new ApiError(HttpStatus.BAD_REQUEST, errors,Instant.now());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
         // return super.handleMethodArgumentNotValid(ex, headers, status, request);

@@ -30,7 +30,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 public class UsersService {
     private final UsersRepo usersRepo;
     private final JavaMailSender javaMailSender;
-    private final FileUploadUtil fileUploadUtil;
+
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
@@ -89,8 +89,8 @@ public class UsersService {
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         mapper.updateValue(existingUser,user);
-        existingUser.getUserProfile().setPpPath(fileUploadUtil.imageUpload(imgFile));
-        existingUser.getUserProfile().setCvPath(fileUploadUtil.resumeUpload(resumeFile));
+        existingUser.getUserProfile().setPpPath(FileUploadUtil.imageUpload(imgFile));
+        existingUser.getUserProfile().setCvPath(FileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,8 +70,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             throws IOException, ServletException {
 
     // after successful login
-        Collection<Authority> authorities=new ArrayList<>();
-        authorities.add(new Authority("USER"));
+//        Collection<Authority> authorities=new ArrayList<>();
+//        authorities.add(new Authority("USER"));
 
         Users loggedInUser=userService.getUserByEmail(authResult.getName());
         String token = JWT.create()
@@ -81,15 +82,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     // saving uuid & updating cookies
         userService.saveUUID(userToken);
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=new UsernamePasswordAuthenticationToken(loggedInUser,null,authorities);
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-//        String body = ((User) authResult.getPrincipal()).getUsername() + " " + token;
-//
-//        response.getWriter().write(body);
-//        response.getWriter().flush();
+
         Map<String,String> hashMap=new HashMap<>();
         hashMap.put("token",token);
         hashMap.put("email",request.getParameter("username"));
+        hashMap.put("auth", authResult.getAuthorities().iterator().next().getAuthority());
+//        BeanUtils.copyProperties(hashMap, response.getOutputStream());
         new ObjectMapper().writeValue(response.getOutputStream(),hashMap);
     }
 
