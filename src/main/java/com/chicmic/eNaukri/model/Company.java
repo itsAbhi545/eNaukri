@@ -6,20 +6,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @RequiredArgsConstructor
+
 public class
 Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
-    private String companyName;
+    private String name;
+    @Column(unique = true)
     private String email;
     private String phoneNumber;
     private String designation;
@@ -34,10 +36,10 @@ Company {
     private String website;
 
     @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<Job> jobList=new ArrayList<>();
+    private Set<Job> jobList=new HashSet<>();
 
     @OneToMany(mappedBy = "employerCompany",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Employer> employerList=new ArrayList<>();
+    private Set<Employer> employerSet =new HashSet<>();
 
 
 }

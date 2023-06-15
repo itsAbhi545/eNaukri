@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.validation.RegEx;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,6 +29,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+@TrimAll
 public class Users {
 
     @Id
@@ -39,13 +41,11 @@ public class Users {
     private LocalDateTime updatedAt;
     @NotNull
     private String fullName;
-    private String username;
+
     @Email
     @Pattern(regexp = RegEx.EMAIL)
-    @NotNull
     private String email;
     @Pattern(regexp = RegEx.PASSWORD,message = "")
-    @NotNull
     private String password;
     private String otp;
     @Column(columnDefinition = "boolean default false")
@@ -53,7 +53,6 @@ public class Users {
     @UuidGenerator
     private String uuid;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
-    @NotNull
     private String phoneNumber;
     @Column(columnDefinition = "boolean default true")
     private boolean enableNotification;

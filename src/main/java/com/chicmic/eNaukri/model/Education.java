@@ -24,6 +24,7 @@ public class Education {
     private LocalDate endOn;
     @JsonFormat(pattern="yyyy/mm/dd")
     private boolean student;
+    @Column(unique = true)
     private String degree;
 
     @ManyToOne(fetch = FetchType.LAZY)

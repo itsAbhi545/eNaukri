@@ -37,6 +37,11 @@ public class Job {
     @UpdateTimestamp
     private LocalDate updatedOn;
     private LocalDate expiresAt;
+    private Float  minYear;
+    private Float maxYear;
+    private Float minSalary;
+    private Float maxSalary;
+
     @Column(columnDefinition = "boolean default true")
     private boolean active;
     private int numApplicants;

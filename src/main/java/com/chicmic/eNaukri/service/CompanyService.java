@@ -4,15 +4,12 @@ import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Employer;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.repo.CompanyRepo;
-import com.chicmic.eNaukri.repo.ExperienceRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -35,12 +32,12 @@ public class CompanyService {
         return null;
     }
 
-    public List<Job> getJobsForCompany(Long id) {
+    public Set<Job> getJobsForCompany(Long id) {
         Company company = companyRepo.findById(id).get();
         return company.getJobList();
     }
-    public List<Employer> findEmployerByEmail(String email) {
+    public Set<Employer> findEmployerByEmail(String email) {
         Company company = companyRepo.findByEmail(email);
-        return  company == null ? new ArrayList<>() : company.getEmployerList();
+        return  company == null ? new HashSet<>() : company.getEmployerSet();
     }
 }

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name="userRoles")
 public class UserRole {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roleId")
@@ -22,5 +22,6 @@ public class UserRole {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userId")
     Users userId;
-    private boolean deleted;
+    @Column(name = "deleted")
+    private boolean deleted = false;
 }

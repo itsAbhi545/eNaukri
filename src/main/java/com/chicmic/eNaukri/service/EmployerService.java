@@ -1,47 +1,39 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.EmployerDto;
-import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.EmployerRepo;
-import com.chicmic.eNaukri.repo.JobRepo;
-import com.chicmic.eNaukri.repo.UserProfileRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.model.Company;
+import com.chicmic.eNaukri.model.Employer;
+import com.chicmic.eNaukri.model.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class EmployerService {
-    private final UsersService usersService;
+    private  final UsersService usersService;
     private final CompanyService companyService;
-    private final UsersRepo usersRepo;
-    private final JobRepo jobRepo;
-    private final UserProfileRepo userProfileRepo;
-    private final EmployerRepo employerRepo;
 
-    public Users saveEmployer(EmployerDto employerDto) {
-        Users user = new Users();
-        BeanUtils.copyProperties(employerDto, user);
 
-        Employer employer = new Employer();
-        BeanUtils.copyProperties(employerDto, employer);
 
-        Company company = new Company();
-        BeanUtils.copyProperties(employerDto, company);
 
-        List<Employer> employerList = companyService.findEmployerByEmail(company.getEmail());
-        employerList.add(employer);
-        company.setEmployerList(employerList);
+    public Users saveEmployer(Users users, MultipartFile userImg,MultipartFile companyImg) throws IOException {
+        Employer employer = users.getEmployerProfile();
+        Company company = users.getEmployerProfile().getEmployerCompany();
+
+        employer.setPpPath( FileUploadUtil.imageUpload(userImg));
+        company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+
+        Set<Employer> employerSet = companyService.findEmployerByEmail(company.getEmail());
+        employerSet.add(employer);
+        company.setEmployerSet(employerSet);
         employer.setEmployerCompany(company);
-        employer.setUsers(user);
-        user.setEmployerProfile(employer);
-        return usersService.register(user);
+        employer.setUsers(users);
+        users.setEmployerProfile(employer);
+        return usersService.register(users);
+
     }
     public Users inviteForJob(Long userId, Long jobId, Principal principal){
         Users invitedUser=usersRepo.findById(userId)

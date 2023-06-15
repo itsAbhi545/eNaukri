@@ -36,27 +36,27 @@ public class JobService {
     private EntityManager entityManager;
     UsersService usersService;
     @Async public void saveJob(JobDto job,Long empId, Long companyId) {
-        String postedFor=companyRepo.findById(companyId).get().getCompanyName();
+        String postedFor=companyRepo.findById(companyId).get().getName();
         Employer employer=employerRepo.findById(empId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        if (!employer.getEmployerCompany().getCompanyName().equals(postedFor)){
+        if (!employer.getEmployerCompany().getName().equals(postedFor)){
             throw new ApiException(HttpStatus.FORBIDDEN,"Employer doesn't belong to this company");
         }
         else{
-        Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
-        List<JobSkills> newJobSkillList = new ArrayList<>();
-        for (String jobSkillId : job.getSkillsList()) {
-            Long skillId = Long.valueOf(jobSkillId);
-            Skills skill=skillsRepo.findById(skillId).orElse(null);
-            JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
-            if (skill != null) {
-                newJobSkillList.add(jobSkill);
+            Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
+            List<JobSkills> newJobSkillList = new ArrayList<>();
+            for (String jobSkillId : job.getSkillsList()) {
+                Long skillId = Long.valueOf(jobSkillId);
+                Skills skill=skillsRepo.findById(skillId).orElse(null);
+                JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
+                if (skill != null) {
+                    newJobSkillList.add(jobSkill);
+                }
             }
-        }
-        System.out.println(newJobSkillList.get(0)+"job skill selected");
-        newJob.setJobSkillsList(newJobSkillList);
-        jobRepo.save(newJob);
-        List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
-        sendEmailNotifications(usersList,newJob);
+            System.out.println(newJobSkillList.get(0)+"job skill selected");
+            newJob.setJobSkillsList(newJobSkillList);
+            jobRepo.save(newJob);
+            List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
+            sendEmailNotifications(usersList,newJob);
         }
     }
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn,

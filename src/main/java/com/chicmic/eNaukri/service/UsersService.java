@@ -60,7 +60,6 @@ public class UsersService {
         newUser.setPassword(passwordEncoder().encode(newUser.getPassword()));
         newUser.setOtp(otp);
         usersRepo.save(newUser);
-//        sendEmail(newUser.getEmail(),subject ,message);
         return newUser;
     }
 
@@ -95,8 +94,8 @@ public class UsersService {
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         mapper.updateValue(existingUser,user);
-        existingUser.getUserProfile().setPpPath(fileUploadUtil.imageUpload(imgFile));
-        existingUser.getUserProfile().setCvPath(fileUploadUtil.resumeUpload(resumeFile));
+        existingUser.getUserProfile().setPpPath(FileUploadUtil.imageUpload(imgFile));
+        existingUser.getUserProfile().setCvPath(FileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
