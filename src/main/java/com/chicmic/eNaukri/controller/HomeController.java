@@ -83,8 +83,11 @@ public class HomeController {
                                  @RequestParam(required = false,name = "location") String location,
                                  @RequestParam(required = false,name = "type") String jobType,
                                  @RequestParam(required = false,name = "postedOn") String postedOn,
-                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
-        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
+                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite,
+                                 @RequestParam(required = false,name = "yoe") Integer yoe,
+                                 @RequestParam(required = false,name = "salary") Integer salary,
+                                 @RequestParam(required = false,name = "skills") List<Long> skillIds){
+        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite,yoe,salary,skillIds);
     }
 
     @GetMapping("{jobId}/listInterestedApplicants")

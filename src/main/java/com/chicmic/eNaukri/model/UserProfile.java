@@ -22,8 +22,6 @@ public class UserProfile {
     private String cvPath;
     private String bio;
     private String ppPath;
-
-
     private boolean hasPremium;
     @OneToOne(mappedBy = "userSubscription", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore

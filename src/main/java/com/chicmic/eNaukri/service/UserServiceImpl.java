@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserDetailsService {
         if(user==null){
             throw new ApiException(HttpStatus.NOT_FOUND,"User does not exist");
         }
-        if(user.isVerified()==false){
+        if(user.isVerified()==false||user.getEmployerProfile().isApproved()==false){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
         }
         Collection<Authority> authorities=new ArrayList<>();

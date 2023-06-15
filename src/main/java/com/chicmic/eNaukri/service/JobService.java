@@ -9,10 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -63,7 +60,7 @@ public class JobService {
         }
     }
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn,
-                                                  String remoteHybridOnsite,Integer yoe,Integer salary) {
+                                                  String remoteHybridOnsite,Integer yoe,Integer salary,List<Long> skillIds) {
         CriteriaBuilder builder=entityManager.getCriteriaBuilder();
         CriteriaQuery<Job> criteriaQuery=builder.createQuery(Job.class);
         Root<Job> root=criteriaQuery.from(Job.class);
@@ -90,10 +87,19 @@ public class JobService {
         Predicate workTypeQuery=(!StringUtils.isEmpty(remoteHybridOnsite))?builder.equal(root.get("remoteHybridOnsite"),remoteHybridOnsite):builder.like(root.get("remoteHybridOnsite"),"%%");
         Predicate activeJobs=builder.isTrue(root.get("active"));
         Predicate yoeQuery = (yoe != null) ? builder.equal(root.get("minYoe"), yoe) : builder.conjunction();
-        Predicate salaryQuery = (salary != null) ? builder.between(root.get("minSalary"), salary, root.get("maxSalary")) : builder.conjunction();
+// Create predicate for salary filter
+        Predicate salaryQuery = (salary != null) ? builder.and(
+                builder.greaterThanOrEqualTo(root.get("minSalary"), salary),
+                builder.lessThanOrEqualTo(root.get("maxSalary"), salary)
+        ) : builder.conjunction();
+        // Create predicate for skill IDs filter
+        Join<Job, Skills> skillJoin = root.join("skills", JoinType.INNER);
+        Predicate skillQuery = (!skillIds.isEmpty()) ? skillJoin.get("id").in(skillIds) : builder.conjunction();
+
+
 
         //building query
-        criteriaQuery.where(builder.or(queryInTitle,queryInDesc),locationQuery,jobTypeQuery,postedOnQuery,workTypeQuery,activeJobs);
+        criteriaQuery.where(builder.or(queryInTitle,queryInDesc),locationQuery,jobTypeQuery,postedOnQuery,workTypeQuery,activeJobs,yoeQuery,salaryQuery,skillQuery);
         //typedQuery for future purposes
         TypedQuery<Job> jobTypedQuery=entityManager.createQuery(criteriaQuery);
         return jobTypedQuery.getResultList();
