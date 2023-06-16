@@ -1,7 +1,6 @@
 package com.chicmic.eNaukri.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -18,7 +17,7 @@ public class ForgotPassword {
     private Long fpId;
     private String token;
     @ManyToOne
-    private Users fUser;
+    private Users users;
     private LocalDateTime expiryTime;
 
     public boolean isExpired(){

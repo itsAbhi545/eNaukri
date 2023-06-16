@@ -1,10 +1,9 @@
 package com.chicmic.eNaukri.controller;
 
+import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.Dto.SocialLinkDto;
-import com.chicmic.eNaukri.model.Company;
-import com.chicmic.eNaukri.model.Job;
-import com.chicmic.eNaukri.model.SocialLink;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import com.chicmic.eNaukri.service.CompanyService;
@@ -13,9 +12,11 @@ import com.chicmic.eNaukri.service.SocialLinkService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +39,12 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("{companyId}/{empId}/postJob")
-    public ResponseEntity<String> postJob(@RequestBody JobDto job, @PathVariable Long companyId, @PathVariable Long empId){
-        jobService.saveJob(job, companyId, empId);
-        return ResponseEntity.ok("Job successfully posted");
+    @PostMapping("/postJob")
+    public ApiResponse postJob(@RequestBody JobDto jobDto, Principal principal){
+
+        Employer employer = userService.getUserByEmail(principal.getName()).getEmployerProfile();
+        Job job = jobService.saveJob(jobDto, employer);
+        return new ApiResponse("Job successfully posted", job, HttpStatus.CREATED);
     }
     @PutMapping("{id}/setStatus")
     public ResponseEntity<String> setStatus(@PathVariable Long id,boolean active){

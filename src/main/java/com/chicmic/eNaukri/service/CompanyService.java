@@ -23,8 +23,10 @@ public class CompanyService {
         Company company = companyRepo.findById(id).get();
         Job reqjob = jobRepo.findById(jobId).get();
         final boolean[] flag = {false};
-        company.getJobList().forEach(job -> {
-            if (jobId.equals(job.getJobId())) flag[0] = true;
+        company.getEmployerSet().forEach(employer -> {
+           employer.getJobList().forEach(job -> {
+               if (jobId.equals(job.getJobId())) flag[0] = true;
+           });
         });
         if (flag[0] = true) {
             return reqjob;
@@ -34,10 +36,19 @@ public class CompanyService {
 
     public Set<Job> getJobsForCompany(Long id) {
         Company company = companyRepo.findById(id).get();
-        return company.getJobList();
+        Set<Job> jobSet = new HashSet<>();
+        company.getEmployerSet().forEach(employer -> {
+            employer.getJobList().forEach(job -> {
+                jobSet.add(job);
+            });
+        });
+        return jobSet;
     }
     public Set<Employer> findEmployerByEmail(String email) {
         Company company = companyRepo.findByEmail(email);
         return  company == null ? new HashSet<>() : company.getEmployerSet();
+    }
+    public Company getCompanyByEmail(String email) {
+        return companyRepo.findByEmail(email);
     }
 }

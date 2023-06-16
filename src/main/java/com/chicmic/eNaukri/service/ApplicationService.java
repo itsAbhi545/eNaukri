@@ -4,23 +4,17 @@ import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.ApplicationDto;
 import com.chicmic.eNaukri.model.Application;
 
-import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.ApplicationRepo;
-import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.FileUploadUtil;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,9 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -65,7 +56,7 @@ public class ApplicationService {
                 job.setNumApplicants(job.getNumApplicants() + 1);
                 jobRepo.save(job);
                 String jobTitle = job.getJobTitle();
-                String company = job.getPostFor().getName();
+                String company = job.getEmployer().getCompany().getName();
                 sendEmailOnApplication(user.getEmail(), jobTitle, company);
             }
         }
@@ -84,6 +75,7 @@ public class ApplicationService {
         helper.setText(content, true);
         javaMailSender.send(message);
         System.out.println("email sent");
+
     }
     public List<Application> viewApplications(Long userId){
         Users user = usersRepo.findById(userId).get();

@@ -4,6 +4,7 @@ import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class UserProfile {
     @Id
     @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    private String fullName;
     private String currentCompany;
     private String cvPath;
     private String bio;

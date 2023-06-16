@@ -94,10 +94,18 @@ public class UserServiceImpl implements UserDetailsService {
         if(user==null){
             throw new ApiException(HttpStatus.NOT_FOUND,"User does not exist");
         }
-        if(user.isVerified()==false){
+        if(user.isVerified()==false ){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
         }
+        if(!user.getEmployerProfile().getIsApproved()) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
+        }
+
+
         UserRole userRole = rolesService.findUserRoleByUser(user);
+        if(userRole.isDeleted()){
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"User is Deleted");
+        }
         Collection<Authority> authorities=new ArrayList<>();
         authorities.add(new Authority("ROLE_" + userRole.getRoleId().getRoleName()));
         return new User(user.getEmail(),user.getPassword(),authorities);

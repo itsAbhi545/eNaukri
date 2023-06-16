@@ -27,6 +27,8 @@ public class PasswordResetService {
     public void delete(PasswordResetToken passwordResetToken){
         resetTokenRepo.delete(passwordResetToken);
     }
+
+
     public void sendEmailForPassword(String recipientEmail, String link)
             throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -52,16 +54,16 @@ public class PasswordResetService {
         System.out.println("email sent");
 
     }
-    public void createPasswordResetTokenForUser(Users user) throws MessagingException, UnsupportedEncodingException {
-        PasswordResetToken passwordResetRequest = new PasswordResetToken();
-        UUID token1= UUID.randomUUID();
-        passwordResetRequest.setUser(user);
-        passwordResetRequest.setToken(token1.toString());
-        passwordResetRequest.setExpiryDate(LocalDateTime.now().plusMinutes(30));
-        resetTokenRepo.save(passwordResetRequest);
-        String link1="http://localhost:8081/enterNewPassword?v="+token1+"/"+user.getUuid();
-        sendEmailForPassword(user.getEmail(), link1);
-    }
+//    public void createUserVerificationToken(Users user) throws MessagingException, UnsupportedEncodingException {
+//        PasswordResetToken passwordResetRequest = new PasswordResetToken();
+//        UUID token1= UUID.randomUUID();
+//        passwordResetRequest.setUser(user);
+//        passwordResetRequest.setToken(token1.toString());
+//        passwordResetRequest.setExpiryDate(LocalDateTime.now().plusMinutes(30));
+//        resetTokenRepo.save(passwordResetRequest);
+//        String link1="http://localhost:8081/enterNewPassword?v="+token1+"/"+user.getUuid();
+//        sendEmailForPassword(user.getEmail(), link1);
+//    }
     public void changeUserPassword(Users user, String password) {
         user.setPassword(password);
         usersRepo.save(user);

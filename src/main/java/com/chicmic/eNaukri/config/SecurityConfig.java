@@ -16,6 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
@@ -46,7 +51,13 @@ public class SecurityConfig  {
 //        CustomAuthenticationFilter authenticationFilter1=
 //                new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
 //        authenticationFilter.setFilterProcessesUrl("/company-login");
-
+        http.csrf(csrf -> {
+            try {
+                csrf.disable().cors(cors-> cors.configurationSource(corsConfigurationSource()).disable());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     //csrf+session
         http.csrf(csrf->csrf.disable());
         http.sessionManagement(sessionManagement->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -60,6 +71,21 @@ public class SecurityConfig  {
 
     //building
         return http.build();
+    }
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        final var configuration = new CorsConfiguration();
+
+        configuration.addAllowedOriginPattern("*");
+
+        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("*"));
+
+        final var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
     @Bean

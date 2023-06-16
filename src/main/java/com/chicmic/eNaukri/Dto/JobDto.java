@@ -2,20 +2,24 @@ package com.chicmic.eNaukri.Dto;
 
 import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.model.JobSkills;
-import lombok.Builder;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @TrimAll
 public class JobDto {
     private Long userId;
     private String jobTitle;
     private String jobDesc;
-    private boolean active;
     private String jobType;
     private String location;
     private String remoteHybridOnsite;
@@ -27,4 +31,5 @@ public class JobDto {
     private Float minSalary;
     private Float maxSalary;
     private List<String> skillsList;
+    private List<String> otherSkills = new ArrayList<String>();
 }

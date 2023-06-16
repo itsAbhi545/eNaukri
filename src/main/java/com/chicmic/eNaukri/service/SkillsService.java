@@ -35,4 +35,7 @@ public class SkillsService {
         }
         usersRepo.save(user);
     }
+    public List<Skills> findBySkillName(String name){
+        return skillsRepo.findSkillsBySkillName(name);
+    }
 }

@@ -13,7 +13,7 @@ import lombok.*;
 public class JobSkills {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long jobSkillId;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -21,5 +21,5 @@ public class JobSkills {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
-    private Skills jobSkill;
+    private Skills skill;
 }

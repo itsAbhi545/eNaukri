@@ -39,15 +39,14 @@ public class Users {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    @NotNull
-    private String fullName;
+
 
     @Email
     @Pattern(regexp = RegEx.EMAIL)
+    @Column(unique = true)
     private String email;
     @Pattern(regexp = RegEx.PASSWORD,message = "")
     private String password;
-    private String otp;
     @Column(columnDefinition = "boolean default false")
     private boolean isVerified;
     @UuidGenerator
@@ -69,11 +68,10 @@ public class Users {
     private Set<UserToken> userTokenSet=new HashSet<>();
 
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private  UserProfile userProfile;
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
+    //@JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private  Employer employerProfile;
 

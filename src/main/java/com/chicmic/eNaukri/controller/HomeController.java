@@ -78,14 +78,7 @@ public class HomeController {
         return true;
     }
 
-    @GetMapping("jobs")
-    public List<Job> displayJobs(@RequestParam(required = false,name = "q") String query,
-                                 @RequestParam(required = false,name = "location") String location,
-                                 @RequestParam(required = false,name = "type") String jobType,
-                                 @RequestParam(required = false,name = "postedOn") String postedOn,
-                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
-        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
-    }
+
 
     @GetMapping("{jobId}/listInterestedApplicants")
     public Collection<?> listInterestedApplicants(@PathVariable("jobId")Long jobId){
@@ -96,7 +89,7 @@ public class HomeController {
     public ResponseEntity<String> setPassword(HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String email = request.getParameter("email");
         Users user = userService.getUserByEmail(email);
-        passwordResetService.createPasswordResetTokenForUser(user);
+        //passwordResetService.createPasswordResetTokenForUser(user);
         return ResponseEntity.ok("Mail sent");
     }
     @GetMapping("/enterNewPassword/{token}/{uuid}")

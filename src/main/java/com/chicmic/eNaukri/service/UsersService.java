@@ -41,25 +41,14 @@ public class UsersService {
 
 
     public Users register(Users newUser) {
-//        log.error("user = " + newUser.getEmployerProfile());
-
         String uuid= UUID.randomUUID().toString();
-//        Users newUser = CustomObjectMapper.convertDtoToObject(dto,Users.class);
-//        newUser.setPpPath(fileUploadUtil.imageUpload(imgFile));
-//        newUser.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
         newUser.setUuid(uuid);
-        // Generate OTP
-        String otp =Integer.toString(new Random().nextInt(999999));
-        // Send OTP to user's email
-        String subject = "OTP for user registration";
-        String message = "Your OTP is: " + otp;
         newUser.setPassword(passwordEncoder().encode(newUser.getPassword()));
-        newUser.setOtp(otp);
         usersRepo.save(newUser);
         return newUser;
     }
 
-    @Async public void sendEmailForOtp(String to, String subject, String body) {
+    @Async public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("harmanjyot.singh@chicmic.co.in");
         message.setTo(to);
@@ -67,22 +56,7 @@ public class UsersService {
         message.setText(body);
         javaMailSender.send(message);
     }
-    public boolean verify(Long userId, String otp) {
-        // Get user by id
-        Users user = usersRepo.findById(userId).get();
-        if (user == null) {
-            return false;
-        }
-        // Check if OTP is correct
-        if (user.getOtp().equals(otp)) {
-            // Update user's OTP status to verified
-            user.setVerified(true);
-            usersRepo.save(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
+
     public void updateUser(@Valid UsersDto user, @RequestParam MultipartFile imgFile,
                            @RequestParam MultipartFile resumeFile) throws IOException {
         Users existingUser=usersRepo.findByEmail(user.getEmail());
@@ -94,4 +68,5 @@ public class UsersService {
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
+
 }

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -41,6 +42,12 @@ public class UserController {
     @PostMapping("{id}/update-profile")
     public ResponseEntity<String> updateProfile(@Valid UsersDto user, @PathVariable("id") Long id, @RequestParam("resumeFile")MultipartFile resumeFile, @RequestParam("imgFile")MultipartFile imgFile) throws IOException {
         usersService.updateUser(user,imgFile,resumeFile);
+        return ResponseEntity.ok("updated successfully");
+    }
+    @PostMapping("/update-profile")
+    public ResponseEntity<String> updateAll(Users users) {
+        //usersService.updateUser(user,imgFile,resumeFile);
+
         return ResponseEntity.ok("updated successfully");
     }
     @GetMapping("{userId}/myapplications")
@@ -109,13 +116,14 @@ public class UserController {
         linkService.addSocialLinks(userId, dto,null);
         return ResponseEntity.ok("Added social links");
     }
-    @PostMapping("{userId}/verify")
-    public ResponseEntity<String> verify(@PathVariable("userId") Long userId,@RequestParam String otp){
-        boolean isVerified = usersService.verify(userId, otp);
+    @PostMapping("verifi")
+    public ResponseEntity<String> verify(Principal principal){
+        boolean isVerified = false;//usersService.verify(userId, otp);
         if (isVerified) {
             return ResponseEntity.ok("User verification successful.");
         } else {
             return ResponseEntity.badRequest().body("Invalid OTP. User verification failed.");
         }
     }
+
 }

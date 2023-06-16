@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,11 @@ Company {
     private String iso;
     private String website;
 
-    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private Set<Job> jobList=new HashSet<>();
+//    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+//    private Set<Job> jobList=new HashSet<>();
 
-    @OneToMany(mappedBy = "employerCompany",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "company",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Employer> employerSet =new HashSet<>();
 
 

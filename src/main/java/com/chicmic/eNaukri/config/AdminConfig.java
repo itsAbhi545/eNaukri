@@ -16,8 +16,8 @@ public class AdminConfig {
     public void createAdmin(){
         Users admin=userService.getUserByEmail("admin@gmail.com");
         if(admin==null){
-            admin=Users.builder().email("admin@gmail.com").phoneNumber("9987654321").fullName("Harman").password(passwordEncoder().encode("Harman@1234")).build();
-            userService.saveUser(admin);
+           // admin=Users.builder().email("admin@gmail.com").phoneNumber("9987654321").fullName("Harman").password(passwordEncoder().encode("Harman@1234")).build();
+//            userService.saveUser(admin);
         }
     }
 }

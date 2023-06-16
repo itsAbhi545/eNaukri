@@ -22,6 +22,6 @@ public class UserSkills {
     private UserProfile userProfile;
 
     @ManyToOne
-    @JsonIgnore
     private Skills skills;
+
 }
