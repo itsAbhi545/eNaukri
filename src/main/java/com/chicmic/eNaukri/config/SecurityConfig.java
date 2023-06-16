@@ -56,8 +56,8 @@ public class SecurityConfig  {
 //        http.authorizeHttpRequests().requestMatchers("/admin/**").hasRole("ADMIN");
         http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
         http.authorizeHttpRequests().anyRequest().permitAll();
-        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/user/**","/company/**").hasAnyAuthority("USER"));
-        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.anyRequest().permitAll());
+//        http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
+//        http.authorizeHttpRequests().anyRequest().permitAll();
 
     //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);

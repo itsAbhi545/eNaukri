@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
+
 @Service
 @RequiredArgsConstructor
 public class ExperienceService {
@@ -21,10 +23,12 @@ public class ExperienceService {
     private final CompanyRepo companyRepo;
     private final ExperienceRepo experienceRepo;
     private final UserExperienceRepo userExperienceRepo;
-    public void addExperience(Long userId, UserExperienceDto dto){
-        Users user=usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+    public void addExperience(Principal principal, UserExperienceDto dto){
+        Users user=usersRepo.findByEmail(principal.getName());
         boolean hasDuplicateJoinedDate = user.getUserProfile().getExperienceList().stream()
-                .anyMatch(e -> e.getJoinedOn().equals(dto.getJoinedOn()));
+                .anyMatch(e -> (e.getJoinedOn().isBefore(dto.getJoinedOn()) && e.getEndedOn().isAfter(dto.getJoinedOn()))
+                    || (e.getJoinedOn().isBefore(dto.getEndedOn()) && e.getEndedOn().isAfter(dto.getEndedOn()))
+                );
 
         if (hasDuplicateJoinedDate) {
             throw new ApiException(HttpStatus.CONFLICT,"A duplicate joinedOn date exists for the user's experience.");
@@ -46,5 +50,8 @@ public class ExperienceService {
         userExperience.setUser(user);
         experienceRepo.save(experience);
         userExperienceRepo.save(userExperience);
+    }
+    public void deleteExperience(Long expId){
+        experienceRepo.deleteById(expId);
     }
 }

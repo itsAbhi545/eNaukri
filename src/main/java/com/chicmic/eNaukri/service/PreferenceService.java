@@ -16,12 +16,5 @@ import java.util.List;
 public class PreferenceService {
     private final UsersRepo usersRepo;
     private final PreferenceRepo preferenceRepo;
-//    public List<Job> getJobsByPreference(Principal principal){
-//        Users user=usersRepo.findByEmail(principal.getName());
-//        user.getUserProfile().getPreference();
-//        for(UserSkills us:user.getUserProfile().getUserSkillsList()){
-//            us.getSkills();
-//        }
-//
-//    }
+
 }

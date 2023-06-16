@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -43,9 +44,14 @@ public class UserController {
         usersService.updateUser(user,imgFile,resumeFile);
         return ResponseEntity.ok("updated successfully");
     }
-    @GetMapping("{userId}/myapplications")
-    public ResponseEntity<String> myApplications(@PathVariable("userId") Long userId){
-        applicationService.viewApplications(userId);
+    @PostMapping("/create-preferences")
+    public ApiResponse createPreference(Principal principal,@RequestBody Preference dto){
+        Preference preference=usersService.createPreferences(principal, dto);
+        return new ApiResponse("Your preferences have been saved",preference,HttpStatus.CREATED);
+    }
+    @GetMapping("/myapplications")
+    public ResponseEntity<String> myApplications(Principal principal){
+        applicationService.viewApplications(principal);
         return ResponseEntity.ok("list of your applications");
     }
     @PostMapping("{userId}/skills")
@@ -56,18 +62,14 @@ public class UserController {
         skillsService.addSkills(dto);
         return ResponseEntity.ok("Skills selected successfully.");
     }
-    @PostMapping("{userId}/education")
-    public ResponseEntity<String> selectUserEducation(
-            @PathVariable("userId") Long userId,
-            @RequestBody UserEducationDto dto) {
-        educationService.addEducation(dto,userId);
+    @PostMapping("/add-education")
+    public ResponseEntity<String> selectUserEducation(Principal principal, @RequestBody UserEducationDto dto) {
+        educationService.addEducation(dto,principal);
         return ResponseEntity.ok("Educational qualification added to the user");
     }
-    @PostMapping("{userId}/experience")
-    public ResponseEntity<String> selectExperience(
-            @PathVariable("userId") Long userId,
-            @RequestBody UserExperienceDto dto) {
-        experienceService.addExperience(userId,dto);
+    @PostMapping("/add-experience")
+    public ResponseEntity<String> selectExperience(@RequestBody UserExperienceDto dto,Principal principal) {
+        experienceService.addExperience(principal,dto);
         return ResponseEntity.ok("Experience added to the user");
     }
     @PostMapping("{userId}/{jobId}/apply")
@@ -78,27 +80,27 @@ public class UserController {
         return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("{id}/unsubscribe")
-    public String unsubscribe(@PathVariable("id") Long id){
-        userService.changeAlerts(id,false);
+    public String unsubscribe(Principal principal){
+        userService.changeAlerts(principal,false);
         return "Unsubscribed !";
     }
     @GetMapping("{id}/subscribe")
-    public String subscribe(@PathVariable("id") Long id){
-        userService.changeAlerts(id,true);
+    public String subscribe(Principal principal){
+        userService.changeAlerts(principal,true);
         return "Subscribed !";
     }
     @GetMapping("{id}/currentCompany")
     public String currentCompany(@PathVariable("id") Long id){
         return userService.findCurrentCompany(id);
     }
-    @GetMapping("{userId}/{jobId}/checkApplication")
-    public String check(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
-        userService.checkJobForUser(userId, jobId);
+    @GetMapping("{jobId}/checkApplication")
+    public String check(Principal p, @PathVariable("jobId") Long jobId){
+        userService.checkJobForUser(p, jobId);
         return "";
     }
-    @PostMapping("{userId}/{jobId}/withdraw")
-    public void withdraw(@PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId){
-        userService.withdrawApxn(userId, jobId);
+    @PostMapping("{jobId}/withdraw")
+    public void withdraw(Principal principal, @PathVariable("jobId") Long jobId){
+        userService.withdrawApxn(principal, jobId);
     }
     @GetMapping("{jobId}/numApplicants")
     public String numApplicants(@PathVariable Long jobId){
@@ -109,18 +111,17 @@ public class UserController {
         linkService.addSocialLinks(userId, dto,null);
         return ResponseEntity.ok("Added social links");
     }
-    @PostMapping("{userId}/verify")
-    public ResponseEntity<String> verify(@PathVariable("userId") Long userId,@RequestParam String otp){
-        boolean isVerified = usersService.verify(userId, otp);
-        if (isVerified) {
-            return ResponseEntity.ok("User verification successful.");
-        } else {
-            return ResponseEntity.badRequest().body("Invalid OTP. User verification failed.");
-        }
+
+    @DeleteMapping("delete-experience")
+    public  ApiResponse delexp(Long expId){
+        experienceService.deleteExperience(expId);
+        return  new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
-    @PostMapping("/{userId}/createProfile")
-    public ResponseEntity<String> makeProfile(@PathVariable Long userId,UserProfile dto){
-        usersService.createProfile(dto,userId);
-        return ResponseEntity.ok("profile set");
+    @DeleteMapping("delete-education")
+    public ApiResponse deled(Long edId){
+        educationService.deleteEducation(edId);
+        return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
+
+
 }

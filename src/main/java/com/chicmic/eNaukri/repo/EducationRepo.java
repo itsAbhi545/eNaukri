@@ -5,4 +5,5 @@ import com.chicmic.eNaukri.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EducationRepo extends JpaRepository<Education,Long> {
+    Education findByDegree(String degree);
 }

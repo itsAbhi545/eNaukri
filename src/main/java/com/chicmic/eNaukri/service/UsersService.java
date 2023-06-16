@@ -1,11 +1,11 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
-import com.chicmic.eNaukri.model.Preference;
-import com.chicmic.eNaukri.model.UserProfile;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.PreferenceRepo;
+import com.chicmic.eNaukri.repo.SkillsRepo;
 import com.chicmic.eNaukri.repo.UserProfileRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -40,6 +42,7 @@ public class UsersService {
     private final FileUploadUtil fileUploadUtil;
     private final UserProfileRepo userProfileRepo;
     private final PreferenceRepo preferenceRepo;
+    private final SkillsRepo skillsRepo;
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
@@ -47,6 +50,7 @@ public class UsersService {
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
 
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
+
 
 
     public Users register(Users newUser) {
@@ -72,22 +76,7 @@ public class UsersService {
         message.setText(body);
         javaMailSender.send(message);
     }
-    public boolean verify(Long userId, String otp) {
-        // Get user by id
-        Users user = usersRepo.findById(userId).get();
-        if (user == null) {
-            return false;
-        }
-        // Check if OTP is correct
-        if (user.getOtp().equals(otp)) {
-            // Update user's OTP status to verified
-            user.setVerified(true);
-            usersRepo.save(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
+
     public void updateUser(@Valid UsersDto user, @RequestParam MultipartFile imgFile,
                            @RequestParam MultipartFile resumeFile) throws IOException {
         Users existingUser=usersRepo.findByEmail(user.getEmail());
@@ -99,9 +88,22 @@ public class UsersService {
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
-    public void createProfile(UserProfile dto,Long userId){
-        Users user = usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        user.setUserProfile(dto);
+    public UserProfile createProfile(UserProfileDto dto, Principal principal,MultipartFile imgFile)
+            throws IOException {
+        Users user = usersRepo.findByEmail(principal.getName());
+        UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
+        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
+        List<UserSkills> userSkillsList=new ArrayList<>();
+        for (Long skillId : dto.getSkillsList()) {
+            Skills skill = skillsRepo.findById(skillId).orElse(null);
+            UserSkills userSkills = UserSkills.builder().skills(skill).userProfile(userProfile).build();
+            if (skill != null) {
+                userSkillsList.add(userSkills);
+            }
+        }
+        userProfile.setUserSkillsList(userSkillsList);
+        user.setUserProfile(userProfile);
+        return user.getUserProfile();
     }
     public Preference createPreferences(Principal principal, Preference preference){
         Users user=usersRepo.findByEmail(principal.getName());

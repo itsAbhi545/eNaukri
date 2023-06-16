@@ -7,7 +7,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -24,7 +26,7 @@ public class Employer {
     private String ppPath;
 
     @Column(columnDefinition = "boolean default false")
-    private Boolean isApproved;
+    private boolean isApproved;
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})

@@ -27,6 +27,7 @@ public class SocialLinkService {
             Users user= usersRepo.findByUserId(userId);
             SocialLink socialLink = CustomObjectMapper.convertDtoToObject(dto,SocialLink.class);
             socialLink.setUserLinks(user);
+            user.setSocialLink(socialLink);
             socialLinkRepo.save(socialLink);
         }
         if (userId==null&&companyId!=null){
@@ -35,5 +36,8 @@ public class SocialLinkService {
             socialLink.setCompanyLinks(company);
             socialLinkRepo.save(socialLink);
         }
+    }
+    public void deleteSocialLinks(Long userId){
+         socialLinkRepo.deleteById(userId);
     }
 }

@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.model.PasswordResetToken;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.PasswordResetTokenRepo;
@@ -8,12 +9,17 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
+
+import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Service
 @RequiredArgsConstructor
@@ -27,45 +33,45 @@ public class PasswordResetService {
     public void delete(PasswordResetToken passwordResetToken){
         resetTokenRepo.delete(passwordResetToken);
     }
-    public void sendEmailForPassword(String recipientEmail, String link)
+    public void sendEmailForPasswordReset(String email)
             throws MessagingException, UnsupportedEncodingException {
+        Users user = usersRepo.findByEmail(email);
+        if(user==null) {
+            throw new ApiException(HttpStatus.FORBIDDEN,"The email you entered is invalid or the user doesn't exist");
+        }
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
+        String otp =Integer.toString(new Random().nextInt(999999));
+        PasswordResetToken passwordResetToken = new PasswordResetToken();
+        passwordResetToken.setUser(user);
+        passwordResetToken.setToken(otp);
+        passwordResetToken.setExpiryDate(LocalDateTime.now().plusMinutes(5));
         helper.setFrom("bluflame.business@gmail.com", "eNaukri Site");
-        helper.setTo(recipientEmail);
-
-        String subject = "Here's the link to reset your password";
-
+        helper.setTo(email);
+        String subject = "Here's the OTP to reset your password";
         String content = "<p>Hello,</p>"
                 + "<p>You have requested to reset your password.</p>"
-                + "<p>Click the link below to change your password:</p>"
-                + "<p style=\"color:blue;\"><a href=\"" + link + "\">Change my password</a></p>"
+                + "<p>Use the OTP below to change your password:</p>"
+                + "<p" + otp + "</p>"
                 + "<br>"
                 + "<p>Ignore this email if you do remember your password, "
                 + "or you have not made the request.</p>";
-
         helper.setSubject(subject);
-
         helper.setText(content, true);
-
         javaMailSender.send(message);
         System.out.println("email sent");
-
     }
-    public void createPasswordResetTokenForUser(Users user) throws MessagingException, UnsupportedEncodingException {
-        PasswordResetToken passwordResetRequest = new PasswordResetToken();
-        UUID token1= UUID.randomUUID();
-        passwordResetRequest.setUser(user);
-        passwordResetRequest.setToken(token1.toString());
-        passwordResetRequest.setExpiryDate(LocalDateTime.now().plusMinutes(30));
-        resetTokenRepo.save(passwordResetRequest);
-        String link1="http://localhost:8081/enterNewPassword?v="+token1+"/"+user.getUuid();
-        sendEmailForPassword(user.getEmail(), link1);
+    public Users resetPassword(String token,String newPassword){
+        PasswordResetToken tokenObject=resetTokenRepo.findByToken(token);
+        Users user=tokenObject.getUser();
+        if(user==null){
+            throw new ApiException(HttpStatus.NOT_FOUND,"Invalid otp or user");
+        }
+        if(LocalDateTime.now().isAfter(tokenObject.getExpiryDate())){
+            throw new ApiException(HttpStatus.FORBIDDEN,"The Reset token has expired make a new request");
+        }
+        user.setPassword(passwordEncoder().encode(newPassword));
+        resetTokenRepo.delete(tokenObject);
+        return user;
     }
-    public void changeUserPassword(Users user, String password) {
-        user.setPassword(password);
-        usersRepo.save(user);
-    }
-
-
 }

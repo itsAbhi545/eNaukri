@@ -42,11 +42,7 @@ public class CompanyController {
         jobService.saveJob(job, companyId, empId);
         return ResponseEntity.ok("Job successfully posted");
     }
-    @PutMapping("{empId}/{jobId}/setStatus")
-    public ResponseEntity<String> setJobStatus(@PathVariable Long jobId,@PathVariable Long empId, boolean active){
-        jobService.setStatus(jobId,active,empId);
-        return ResponseEntity.ok("Status changed");
-    }
+
     @PostMapping("{id}/addSocialLinks")
     public ResponseEntity<String> addSocialLinks(@PathVariable Long id, SocialLinkDto dto){
         linkService.addSocialLinks(null, dto,id);

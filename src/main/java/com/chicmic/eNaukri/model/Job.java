@@ -47,10 +47,10 @@ public class Job {
     private int numApplicants;
 
 //mappings
-    @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Application> applicationList =new ArrayList<>();
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
     private List<JobSkills> jobSkillsList =new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.REMOVE)

@@ -113,7 +113,7 @@ public class SubscriptionController {
         return "";
     }
 
-    @PostMapping("/webhook/")
+    @PostMapping("/webhook")
     public String handleStripeEvent(HttpServletRequest request,HttpServletResponse response) throws IOException  {
         String payload = IOUtils.toString(request.getReader());
         Event event = null;
@@ -167,6 +167,9 @@ public class SubscriptionController {
                 // Then define and call a function to handle the event
                 // customer.subscription.created
                 // handleSubscriptionCreated(subscription);
+            case "payment_intent.created":
+                subscription = (Subscription) stripeObject;
+                System.out.println(subscription.getCustomer());
             case "customer.subscription.updated":
                 subscription = (Subscription) stripeObject;
                 // Then define and call a function to handle the event

@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -86,7 +87,7 @@ public class JobService {
         }
         Predicate workTypeQuery=(!StringUtils.isEmpty(remoteHybridOnsite))?builder.equal(root.get("remoteHybridOnsite"),remoteHybridOnsite):builder.like(root.get("remoteHybridOnsite"),"%%");
         Predicate activeJobs=builder.isTrue(root.get("active"));
-        Predicate yoeQuery = (yoe != null) ? builder.equal(root.get("minYoe"), yoe) : builder.conjunction();
+        Predicate yoeQuery = (yoe != null) ? builder.equal(root.get("minYear"), yoe) : builder.conjunction();
 // Create predicate for salary filter
         Predicate salaryQuery = (salary != null) ? builder.and(
                 builder.greaterThanOrEqualTo(root.get("minSalary"), salary),
@@ -120,10 +121,11 @@ public class JobService {
         } );
         return usersCollection;
     }
-    public void setStatus(Long jobId, boolean active,Long empId) {
-        Employer employer=employerRepo.findById(empId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such employer exists"));
+    public void setStatus(Long jobId, boolean active, Principal principal) {
+        Users user=usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such job exists"));
-        if(employer.getName().equals(job.getEmployer().getName())){
+        if(user.getEmployerProfile().getEmployerCompany()
+                .equals(job.getEmployer().getEmployerCompany())){
             job.setActive(active);
             jobRepo.save(job);
         }
@@ -162,5 +164,8 @@ public class JobService {
     public List<Application> getListOfApplicants(Long jobId){
         Job job=jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job doesn't exist"));
         return job.getApplicationList();
+    }
+    public void deletePostedJob(Long jobId){
+        jobRepo.deleteById(jobId);
     }
 }

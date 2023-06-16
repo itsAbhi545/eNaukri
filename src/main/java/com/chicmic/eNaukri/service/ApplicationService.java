@@ -28,7 +28,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -83,10 +85,23 @@ public class ApplicationService {
         javaMailSender.send(message);
         System.out.println("email sent");
     }
-    public List<Application> viewApplications(Long userId){
-        Users user = usersRepo.findById(userId).get();
+    public List<Application> viewApplications(Principal principal){
+        Users user = usersRepo.findByEmail(principal.getName());
         List<Application> applications=user.getUserProfile().getApplicationList();
         return applications;
+    }
+    public void deleteYourApplication(Long appId){
+        applicationRepo.deleteById(appId);
+    }
+    public List<Application> getApplicantListForJob(Principal principal, Long jobId){
+        Job job=jobRepo.findById(jobId)
+                .orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job not found or deleted"));
+        Users employer=usersService.getUserByEmail(principal.getName());
+        Set<Job> postedJobs=employer.getEmployerProfile().getEmployerCompany().getJobList();
+        if(!postedJobs.contains(job)){
+            throw new ApiException(HttpStatus.FORBIDDEN,"Not allowed to see applicants for this job");
+        }
+        return job.getApplicationList();
     }
     public int getNumApplicantsForJob(Long jobId) {
         Job job = jobRepo.findById(jobId).orElse(null);
@@ -94,18 +109,21 @@ public class ApplicationService {
             throw new ApiException(HttpStatus.CONFLICT,"not found");
         return job.getNumApplicants();
     }
-    public void changeStatus(Long appId, Long empId,Long statusId){
+    public Application changeApplicationStatus(Long appId, Principal principal,Long statusId){
         Application application= applicationRepo.findById(appId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such application exists or has been deleted"));
-        Employer employer= employerRepo.findById(empId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such employer exists"));
+        Users jobPoster=usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findJobByJobId(application.getJobId().getJobId());
         ApplicationStatus status= statusRepo.findById(statusId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"no such application status exists"));
-        if(job.getEmployer().equals(employer)){
+        if(job.getEmployer().equals(jobPoster)){
             application.setApplicationStatus(status);
             String to=application.getEmail();
             String subject="Regarding status of your application for "+job.getJobTitle();
-            String body="Your application for "+job.getJobTitle()+",at "+job.getPostFor().getCompanyName()+
+            String body="Your application for "+job.getJobTitle()+",at "+job.getPostFor().getName()+
                     " has been "+status.getMessage();
             usersService.sendEmail(to,subject,body);
+            return application;
         }
+        return null;
     }
+
 }

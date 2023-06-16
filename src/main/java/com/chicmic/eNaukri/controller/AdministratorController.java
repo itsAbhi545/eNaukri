@@ -3,14 +3,14 @@ package com.chicmic.eNaukri.controller;
 import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.model.ApplicationStatus;
 import com.chicmic.eNaukri.model.JobCategories;
+import com.chicmic.eNaukri.model.Roles;
 import com.chicmic.eNaukri.model.Skills;
 import com.chicmic.eNaukri.repo.EmployerRepo;
 import com.chicmic.eNaukri.service.AdministratorService;
+import com.chicmic.eNaukri.service.RolesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/")
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdministratorController {
     private final AdministratorService administratorService;
     private final EmployerRepo employerRepo;
+    private final RolesService rolesService;
     @PostMapping("createApplicationStatus")
     public ApiResponse createApplicationStatus(ApplicationStatus applicationStatus){
          applicationStatus=administratorService.createApplicationStatus(applicationStatus);
@@ -37,5 +38,20 @@ public class AdministratorController {
     public ApiResponse addNewSkills(Skills skills){
         skills=administratorService.createSkills(skills);
         return new ApiResponse("skill created",skills,HttpStatus.CREATED);
+    }
+    @PostMapping("/addRole")
+    public String addRole(@RequestParam String roleName){
+        Roles roles = rolesService.getRoleByRoleName(roleName);
+        if(roles == null){
+            roles = Roles.builder()
+                    .roleName(roleName.toUpperCase())
+                    .build();
+            rolesService.saveRoles(roles);
+        }
+        return "Successfully Added " + roleName;
+    }
+    @PutMapping("/{userId}/soft-delete")
+    public void softDelete(@PathVariable Long userId, boolean obj){
+        administratorService.softDelete(userId, obj);
     }
 }

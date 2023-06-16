@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.UUID;
+
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Configuration
@@ -16,10 +18,12 @@ public class AdminConfig {
     public void createAdmin(){
         Users admin=userService.getUserByEmail("hermano@gmail.com");
         if(admin==null){
+            String uuid=UUID.randomUUID().toString();
             admin=Users.builder().email("hermano@gmail.com")
                     .phoneNumber("9987654321")
                     .fullName("Harman")
                     .password(passwordEncoder().encode("Harman@1234"))
+                    .uuid(uuid)
                     .isVerified(true)
                     .build();
             userService.saveUser(admin);
