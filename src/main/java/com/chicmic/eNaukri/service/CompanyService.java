@@ -74,8 +74,8 @@ public class CompanyService {
         });
         return jobSet;
     }
-    public Set<Employer> findEmployerByEmail(String email) {
-        Company company = companyRepo.findByEmail(email);
+    public Set<Employer> findEmployerById(Long id) {
+        Company company = companyRepo.findById(id).get();
         return  company == null ? new HashSet<>() : company.getEmployerSet();
     }
     public Company getCompanyByEmail(String email) {
@@ -101,5 +101,9 @@ public class CompanyService {
             return job.getApplicationList();
         }
         return null;
+    }
+
+    public List<Company> searchCompany(String query) {
+        return companyRepo.findCompanyByQuery(query);
     }
 }

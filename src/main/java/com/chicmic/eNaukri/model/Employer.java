@@ -34,7 +34,6 @@ Employer {
      private Boolean isApproved = false;
     @OneToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
     private Users users;
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

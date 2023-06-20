@@ -31,7 +31,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         System.out.println(request.getServletPath());
 
         if(request.getServletPath().contains("/user/")||(request.getServletPath().contains("/company/")
-                && !request.getServletPath().contains("/company/signup"))
+                && !request.getServletPath().contains("/company/signup") && !request.getServletPath().contains("/company/search"))
 
         ){
             String token=request.getHeader("Authorization").substring(7);
