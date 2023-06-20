@@ -23,6 +23,7 @@ Employer {
     private Long id;
     @NotNull
     private String fullName;
+    private String designation;
 
     private String ppPath;
 

@@ -21,6 +21,7 @@ import java.util.Map;
 public class SubscriptionService {
     private  final UsersRepo usersRepo;
     private final PremiumRepo premiumRepo;
+    private final UsersService usersService;
 
     public String startSubscription(Long userId) throws StripeException {
 
@@ -36,8 +37,8 @@ public class SubscriptionService {
         PaymentIntent confirmIntent = intent.confirm();
         // Check if the payment is successful
         if ("succeeded".equals(confirmIntent.getStatus())) {
-            user.getUserProfile().setHasPremium(true);
-            premium.setUserSubscription(user.getUserProfile());
+            usersService.getUserProfile(user).setHasPremium(true);
+            premium.setUserSubscription(usersService.getUserProfile(user));
             premiumRepo.save(premium);
             return intent.getInvoice();
         }

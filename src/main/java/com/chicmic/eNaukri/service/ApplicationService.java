@@ -34,6 +34,7 @@ public class ApplicationService {
     private final UsersRepo usersRepo;
     private final JobRepo jobRepo;
     private final JavaMailSender javaMailSender;
+    private final UsersService usersService;
     public void applyForJob(ApplicationDto application, Long userId, Long jobId)
             throws IOException, MessagingException, ApiException {
 
@@ -79,7 +80,7 @@ public class ApplicationService {
     }
     public List<Application> viewApplications(Long userId){
         Users user = usersRepo.findById(userId).get();
-        List<Application> applications=user.getUserProfile().getApplicationList();
+        List<Application> applications=usersService.getUserProfile(user).getApplicationList();
         return applications;
     }
     public int getNumApplicantsForJob(Long jobId) {

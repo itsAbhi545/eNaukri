@@ -67,13 +67,13 @@ public class Users {
     @JsonIgnore
     private Set<UserToken> userTokenSet=new HashSet<>();
 
-    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private  UserProfile userProfile;
-    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    //@JsonIgnore
-    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    private  Employer employerProfile;
+//    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+//    private  UserProfile userProfile;
+//    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    //@JsonIgnore
+//    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+//    private  Employer employerProfile;
 
 
 

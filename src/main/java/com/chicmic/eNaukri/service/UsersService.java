@@ -1,7 +1,9 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.UserProfile;
 import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.repo.UserProfileRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
@@ -19,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.util.List;
 import java.util.UUID;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
@@ -30,6 +32,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 public class UsersService {
     private final UsersRepo usersRepo;
     private final JavaMailSender javaMailSender;
+    private final UserProfileRepo userProfileRepo;
 
 
     public Users getUserByEmail(String email) {
@@ -63,10 +66,17 @@ public class UsersService {
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         mapper.updateValue(existingUser,user);
-        existingUser.getUserProfile().setPpPath(FileUploadUtil.imageUpload(imgFile));
-        existingUser.getUserProfile().setCvPath(FileUploadUtil.resumeUpload(resumeFile));
+        getUserProfile(existingUser).setPpPath(FileUploadUtil.imageUpload(imgFile));
+        getUserProfile(existingUser).setCvPath(FileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
+    }
+    //Search
+    public List<UserProfile> searchUser(String query) {
+        return userProfileRepo.findByQuery(query);
+    }
+    public UserProfile getUserProfile(Users users) {
+        return userProfileRepo.findUserProfileByUsers(users);
     }
 
 }

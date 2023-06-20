@@ -22,11 +22,6 @@ Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
     private String name;
-    @Column(unique = true)
-    private String email;
-    private String phoneNumber;
-    private String designation;
-
     private LocalDate foundedIn;
     private String about;
     private String ppPath;
@@ -35,9 +30,16 @@ Company {
     private String gstId;
     private String iso;
     private String website;
+    @Column(columnDefinition = "BIT DEFAULT 0")
+    private boolean approved;
+    private String uuid;
 
 //    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
 //    private Set<Job> jobList=new HashSet<>();
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private Users users;
 
     @OneToMany(mappedBy = "company",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore

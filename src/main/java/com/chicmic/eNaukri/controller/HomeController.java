@@ -1,10 +1,9 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
+import com.chicmic.eNaukri.Dto.CompanyDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
-import com.chicmic.eNaukri.model.Job;
-import com.chicmic.eNaukri.model.PasswordResetToken;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.service.*;
 import com.itextpdf.text.DocumentException;
@@ -30,7 +29,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 
 @RestController
-@RequestMapping("/")
+//@RequestMapping("/")
 @RequiredArgsConstructor
 public class HomeController {
 
@@ -40,6 +39,9 @@ public class HomeController {
     private final JobService jobService;
     private final PasswordResetService passwordResetService;
     private final ResumeGenerator resumeGenerator;
+    private final CompanyService companyService;
+    private final RolesService rolesService;
+
 
     @GetMapping
     public String homePage(){
@@ -131,4 +133,7 @@ public class HomeController {
         jobService.getUsersWithMatchingSkills(jobId);
         return ResponseEntity.ok("k");
     }
+
+
+
 }

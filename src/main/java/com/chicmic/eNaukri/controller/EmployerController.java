@@ -1,6 +1,8 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.Employer;
 import com.chicmic.eNaukri.model.Roles;
 import com.chicmic.eNaukri.model.UserRole;
 import com.chicmic.eNaukri.model.Users;
@@ -30,15 +32,15 @@ public class EmployerController {
     public ApiResponse signup( String jsonString , @ModelAttribute MultipartFile userImg,
                               @ModelAttribute MultipartFile companyImg) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        Users users = mapper.readValue(jsonString, Users.class);
-        users = employerService.saveEmployer(users, userImg, companyImg);
+        UsersDto usersDto = mapper.readValue(jsonString, UsersDto.class);
+        Employer employer = employerService.saveEmployer(usersDto, userImg, companyImg);
         Roles roles = rolesService.getRoleByRoleName("EMPLOYER");
         UserRole userRole = UserRole.builder()
-                .userId(users)
+                .userId(employer.getUsers())
                 .roleId(roles)
                 .build();
         rolesService.saveUserRole(userRole);
-        return new ApiResponse( "User Register Successfully as Employer", users, HttpStatus.CREATED );
+        return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );
     }
     @PostMapping("/addRole")
     public String addRole(@RequestParam String roleName){

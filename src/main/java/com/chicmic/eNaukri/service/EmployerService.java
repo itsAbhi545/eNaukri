@@ -1,10 +1,13 @@
 package com.chicmic.eNaukri.service;
 
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
+import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.EmployerRepo;
 import com.chicmic.eNaukri.repo.PreferenceRepo;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,25 +23,22 @@ public class EmployerService {
     private final EmployerRepo employerRepo;
 
 
-    public Users saveEmployer(Users users , MultipartFile userImg,MultipartFile companyImg) throws IOException {
-        Employer employer = users.getEmployerProfile();
+    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
+        Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
-        Company company = users.getEmployerProfile().getCompany();
-
-        employer.setPpPath( FileUploadUtil.imageUpload(userImg));
+        Company company = companyService.findByID(usersDto.getCompanyId());
+        employer.setPpPath(FileUploadUtil.imageUpload(userImg));
         company.setPpPath(FileUploadUtil.imageUpload(companyImg));
-        Company companyIfExist = companyService.getCompanyByEmail(company.getEmail());
-        if(companyIfExist != null){
-            company = companyIfExist;
-        }
-        Set<Employer> employerSet = companyService.findEmployerByEmail(company.getEmail());
+
+        Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
         employerSet.add(employer);
         company.setEmployerSet(employerSet);
         employer.setCompany(company);
+        Users users = new Users();
+        BeanUtils.copyProperties(usersDto, users);
         employer.setUsers(users);
-        users.setEmployerProfile(employer);
-        return usersService.register(users);
-
+        usersService.register(users);
+        return employerRepo.save(employer);
     }
 
     //Search
@@ -62,6 +62,9 @@ public class EmployerService {
         return employerRepo.findEmployersByAnyMatch(query);
     }
 
+    public Employer findByUsers(Users users){
+        return employerRepo.findByUsers(users);
+    }
 
 
 }

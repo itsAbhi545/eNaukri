@@ -25,9 +25,11 @@ import java.time.LocalDate;
     EducationRepo educationRepo;
     @Autowired
     UserEducationRepo userEducationRepo;
+    @Autowired
+    UsersService usersService;
     public void addEducation(UserEducationDto dto,Long userId){
         Users user=usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        boolean hasDuplicateDegree = user.getUserProfile().getEducationList().stream()
+        boolean hasDuplicateDegree = usersService.getUserProfile(user).getEducationList().stream()
                 .anyMatch(e -> e.getDegree().equalsIgnoreCase(dto.getDegree()));
         if (hasDuplicateDegree) {
             throw new ApiException(HttpStatus.CONFLICT,"A duplicate degree entry already exists for the user.");
@@ -44,7 +46,7 @@ import java.time.LocalDate;
         else{
             education.setStudent(true);
         }
-        education.setEdUser(user.getUserProfile());
+        education.setEdUser(usersService.getUserProfile(user));
         UserEducation userEducation=new UserEducation();
         userEducation.setEducation(education);
         userEducation.setUser(user);

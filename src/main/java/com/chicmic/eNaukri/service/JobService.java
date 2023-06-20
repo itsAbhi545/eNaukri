@@ -164,7 +164,7 @@ public class JobService {
     @Async
     private void sendEmailNotifications(List<Users> users, Job job) {
         for (Users users1 : users) {
-                String body = "Dear " + users1.getUserProfile().getFullName() + ",\n"
+                String body = "Dear " + usersService.getUserProfile(users1).getFullName() + ",\n"
                         + "A new job matching your skills has been posted.\n"
                         + "Job Title: " + job.getJobTitle() + "\n"
                         + "Job Description: " + job.getJobDesc() + "\n"

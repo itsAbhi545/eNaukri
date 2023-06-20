@@ -20,17 +20,18 @@ public class SkillsService {
     private final UsersRepo usersRepo;
     private final SkillsRepo skillsRepo;
     private final UserSkillsRepo userSkillsRepo;
+    private final UsersService usersService;
     public void addSkills(UserSkillDto dto){
         Long userId = dto.getUserId();
         List<Long> skillIds = dto.getSkillIds();
         Users user = usersRepo.findByUserId(userId);
-        UserProfile userProfile = user.getUserProfile();
+        UserProfile userProfile = usersService.getUserProfile(user);
         List<Skills> selectedSkills = skillsRepo.findAllById(skillIds);
         for (Skills skill : selectedSkills) {
             UserSkills userSkills=new UserSkills();
             userSkills.setUserProfile(userProfile);
             userSkills.setSkills(skill);
-            user.getUserProfile().getUserSkillsList().add(userSkills);
+            usersService.getUserProfile(user).getUserSkillsList().add(userSkills);
             userSkillsRepo.save(userSkills);
         }
         usersRepo.save(user);
