@@ -74,4 +74,8 @@ public class CompanyService {
     public Company getCompanyByEmail(String email) {
         return companyRepo.findByEmail(email);
     }
+
+    public List<Company> searchCompany(String query) {
+        return companyRepo.findCompanyByQuery(query);
+    }
 }

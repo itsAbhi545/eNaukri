@@ -79,7 +79,11 @@ public class CompanyController {
         return new ApiResponse("Company " + users.getEmail() + " Register Successfully", company, HttpStatus.CREATED);
     }
     //Search
-
+    @GetMapping("/search")
+    public ApiResponse search(@RequestParam("query") String query) {
+        List<Company> companyList = companyService.searchCompany(query);
+        return new ApiResponse("Search Result Successfully Generated for the query", companyList, HttpStatus.OK);
+    }
 
 
 }

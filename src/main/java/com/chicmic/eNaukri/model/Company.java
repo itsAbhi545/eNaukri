@@ -38,7 +38,6 @@ Company {
 //    private Set<Job> jobList=new HashSet<>();
     @OneToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore
     private Users users;
 
     @OneToMany(mappedBy = "company",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
