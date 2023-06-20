@@ -1,11 +1,11 @@
 package com.chicmic.eNaukri.model;
 
+import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserProfile {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    private String fullName;
     private String currentCompany;
     private String cvPath;
     private String bio;
@@ -28,7 +30,6 @@ public class UserProfile {
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Premium premium;
     @OneToOne(mappedBy = "userPreferences", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Preference preference;
 
@@ -47,6 +48,7 @@ public class UserProfile {
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    @JsonIgnore
     private Users users;
     @ManyToMany(cascade = CascadeType.REMOVE)
     private List<Job> invitedJobs=new ArrayList<>();

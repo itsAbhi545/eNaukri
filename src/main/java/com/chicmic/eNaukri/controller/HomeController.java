@@ -33,8 +33,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 @RequestMapping("/")
 @RequiredArgsConstructor
 public class HomeController {
-
-    private final UsersRepo usersRepo;
+    private final CompanyService companyService;
     private final UsersService usersService;
     private final UserServiceImpl userService;
     private final JobService jobService;
@@ -60,6 +59,11 @@ public class HomeController {
     public ApiResponse register(@Valid Users dto) {
         Users user=usersService.register(dto);
         return new ApiResponse("user created",user,HttpStatus.CREATED );
+    }
+    @PostMapping("eNaukri/verify/{token}/{uuid}")
+    public ResponseEntity<String> verifyUser(@PathVariable String token,@PathVariable String uuid){
+        usersService.verifyUserAccount(token,uuid);
+        return ResponseEntity.ok("User verified successfully");
     }
     @PostMapping("updateProfile")
     public void updateProfile(UsersDto user, @RequestParam(value="resumeFile",required = false)MultipartFile resumeFile, @RequestParam(value="imgFile",required = false)MultipartFile imgFile) throws IOException {
@@ -87,10 +91,6 @@ public class HomeController {
         return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite,yoe,salary,skillIds);
     }
 
-    @GetMapping("{jobId}/listInterestedApplicants")
-    public Collection<?> listInterestedApplicants(@PathVariable("jobId")Long jobId){
-        return jobService.listInterestedApplicants(jobId);
-    }
     @PostMapping("password-reset-request")
     public ResponseEntity<String> sendPasswordResetOtp(@RequestParam String email) throws
             MessagingException, UnsupportedEncodingException {
@@ -108,20 +108,14 @@ public class HomeController {
         resumeGenerator.generatePDF(response,users);
         return "success";
     }
-
     @PostMapping("/new")
     @ResponseBody
     public ResponseEntity<String> nwe(@RequestParam("jobId") Long jobId){
         jobService.getUsersWithMatchingSkills(jobId);
         return ResponseEntity.ok("k");
     }
-    @DeleteMapping("/delete-job/{jobId}")
-    public void deleteJob(@PathVariable Long jobId){
-        jobService.deletePostedJob(jobId);
-    }
-    @PostMapping("/create-profile")
-    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto, MultipartFile imgFile) throws IOException {
-        UserProfile up=usersService.createProfile(dto, principal,imgFile);
-        return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
+    @GetMapping("jobs-by-company/{companyId}")
+    public ApiResponse getJobsByCompany(@PathVariable Long companyId){
+        return new ApiResponse("List of Jobs",companyService.getJobsForCompany(companyId),HttpStatus.OK);
     }
 }

@@ -88,7 +88,6 @@ public class SubscriptionController {
                 .setCancelUrl("http://localhost:8081" + "/cancel")
                 .build();
         session=Session.create(params);
-
         model.addAttribute("sessionId",session.getId());
         System.out.println("url sessiombheffg" + session.getUrl());
         response.sendRedirect(session.getUrl());

@@ -6,16 +6,17 @@ import com.chicmic.eNaukri.Dto.Status;
 import com.chicmic.eNaukri.model.*;
 
 import com.chicmic.eNaukri.repo.*;
+import com.chicmic.eNaukri.model.Job;
+import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.repo.ApplicationRepo;
+import com.chicmic.eNaukri.repo.JobRepo;
+import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.FileUploadUtil;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -43,10 +44,10 @@ public class ApplicationService {
     private final EmployerRepo employerRepo;
     private final ApplicationStatusRepo statusRepo;
     private final UsersService usersService;
-    public void applyForJob(ApplicationDto application, Long userId, Long jobId)
+    public void applyForJob(ApplicationDto application, Principal principal, Long jobId)
             throws IOException, MessagingException, ApiException {
 
-        Users user = usersRepo.findByUserId(userId);
+        Users user = usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findJobByJobId(jobId);
         MultipartFile resumeFile = application.getResumeFile();
 
@@ -65,7 +66,7 @@ public class ApplicationService {
                 job.setNumApplicants(job.getNumApplicants() + 1);
                 jobRepo.save(job);
                 String jobTitle = job.getJobTitle();
-                String company = job.getPostFor().getName();
+                String company = job.getEmployer().getCompany().getName();
                 sendEmailOnApplication(user.getEmail(), jobTitle, company);
             }
         }
@@ -97,7 +98,7 @@ public class ApplicationService {
         Job job=jobRepo.findById(jobId)
                 .orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job not found or deleted"));
         Users employer=usersService.getUserByEmail(principal.getName());
-        Set<Job> postedJobs=employer.getEmployerProfile().getEmployerCompany().getJobList();
+        Set<Job> postedJobs=employer.getEmployerProfile().getJobList();
         if(!postedJobs.contains(job)){
             throw new ApiException(HttpStatus.FORBIDDEN,"Not allowed to see applicants for this job");
         }

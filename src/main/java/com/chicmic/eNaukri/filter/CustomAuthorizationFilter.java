@@ -30,7 +30,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println(request.getServletPath());
 
-        if(request.getServletPath().contains("/user/")||request.getServletPath().contains("/company/")){
+        if(request.getServletPath().contains("/user/")||request.getServletPath().contains("/company/")
+
+        ){
             String token=request.getHeader("Authorization").substring(7);
             if(token==null || userService.findUserFromUUID(token)==null){
                 Map<String,String> error=new HashMap<>();
@@ -49,7 +51,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 authorities.add(new Authority("USER"));
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=
-                        new UsernamePasswordAuthenticationToken(temp,null,authorities);
+                        new UsernamePasswordAuthenticationToken(temp.getEmail(),null,authorities);
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 filterChain.doFilter(request,response);
             }

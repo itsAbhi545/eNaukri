@@ -21,13 +21,19 @@ public class AdministratorService {
     private final JobCategoriesRepo jobCategoriesRepo;
     private final SkillsRepo skillsRepo;
     private final RolesService rolesService;
+    private final CompanyRepo companyRepo;
     public ApplicationStatus createApplicationStatus(ApplicationStatus dto){
         ApplicationStatus applicationStatus=applicationStatusRepo.save(dto);
         return applicationStatus;
     }
-    public void approveEmployer(Long empId,boolean approve){
-        Employer employer=employerRepo.findById(empId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"employer doesn't exist"));
-        employer.setApproved(approve);
+    public void approveCompany(Long companyId){
+        Company company=companyRepo.findById(companyId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"company doesn't exist"));
+        if(company.isApproved()){
+            company.setApproved(false);
+        }
+        else{
+            company.setApproved(true);
+        }
     }
     public JobCategories createJobCategories(JobCategories dto){
         JobCategories jobCategories=jobCategoriesRepo.save(dto);
@@ -40,10 +46,15 @@ public class AdministratorService {
         Skills newSkill=skillsRepo.save(dto);
         return newSkill;
     }
-    public void softDelete(Long userId,boolean deleted){
+    public void softDelete(Long userId){
         Users user= usersRepo.findById(userId).get();
         UserRole userRole=rolesService.findUserRoleByUser(user);
-        userRole.setDeleted(deleted);
+        if(userRole.isDeleted()){
+            userRole.setDeleted(false);
+        }
+        else{
+            userRole.setDeleted(true);
+        }
     }
 //    public Users editProfile(Principal principal,){
 //        Users admin = usersRepo.findByEmail(principal.getName());

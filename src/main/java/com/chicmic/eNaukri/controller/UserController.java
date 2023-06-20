@@ -49,12 +49,12 @@ public class UserController {
         Preference preference=usersService.createPreferences(principal, dto);
         return new ApiResponse("Your preferences have been saved",preference,HttpStatus.CREATED);
     }
-    @GetMapping("/myapplications")
+    @GetMapping("/my-applications")
     public ResponseEntity<String> myApplications(Principal principal){
         applicationService.viewApplications(principal);
         return ResponseEntity.ok("list of your applications");
     }
-    @PostMapping("{userId}/skills")
+    @PostMapping("add-skills")
     public ResponseEntity<String> selectUserSkills(
             @PathVariable("userId") Long userId,
             @RequestBody UserSkillDto dto) {
@@ -72,11 +72,10 @@ public class UserController {
         experienceService.addExperience(principal,dto);
         return ResponseEntity.ok("Experience added to the user");
     }
-    @PostMapping("{userId}/{jobId}/apply")
-    public ResponseEntity<String> apply(
-            @PathVariable("userId") Long userId, @PathVariable("jobId") Long jobId,
+    @PostMapping("apply/{jobId}")
+    public ResponseEntity<String> apply(Principal principal, @PathVariable("jobId") Long jobId,
              ApplicationDto application) throws MessagingException, IOException {
-        applicationService.applyForJob(application,userId,jobId);
+        applicationService.applyForJob(application,principal,jobId);
         return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("{id}/unsubscribe")
@@ -98,11 +97,11 @@ public class UserController {
         userService.checkJobForUser(p, jobId);
         return "";
     }
-    @PostMapping("{jobId}/withdraw")
+    @PostMapping("withdraw/{jobId}")
     public void withdraw(Principal principal, @PathVariable("jobId") Long jobId){
         userService.withdrawApxn(principal, jobId);
     }
-    @GetMapping("{jobId}/numApplicants")
+    @GetMapping("number-applicants/{jobId}")
     public String numApplicants(@PathVariable Long jobId){
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
@@ -122,6 +121,10 @@ public class UserController {
         educationService.deleteEducation(edId);
         return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
-
+    @PostMapping("/create-profile")
+    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto){
+        UserProfile up=usersService.createProfile(dto, principal);//,imgFile);
+        return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
+    }
 
 }

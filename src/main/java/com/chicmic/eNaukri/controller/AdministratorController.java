@@ -7,6 +7,7 @@ import com.chicmic.eNaukri.model.Roles;
 import com.chicmic.eNaukri.model.Skills;
 import com.chicmic.eNaukri.repo.EmployerRepo;
 import com.chicmic.eNaukri.service.AdministratorService;
+import com.chicmic.eNaukri.service.CompanyService;
 import com.chicmic.eNaukri.service.RolesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,17 +18,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdministratorController {
     private final AdministratorService administratorService;
-    private final EmployerRepo employerRepo;
     private final RolesService rolesService;
-    @PostMapping("createApplicationStatus")
+    private final CompanyService companyService;
+    @PostMapping("create-application-status")
     public ApiResponse createApplicationStatus(ApplicationStatus applicationStatus){
          applicationStatus=administratorService.createApplicationStatus(applicationStatus);
         return new ApiResponse("Created new status",applicationStatus,HttpStatus.CREATED);
     }
     @PostMapping("approve-company")
-    public ApiResponse approve(Long empId,boolean approve){
-        administratorService.approveEmployer(empId,approve);
-        return new ApiResponse("Employer status changed",employerRepo.findById(empId).get(),HttpStatus.CREATED);
+    public ApiResponse approve(Long id){
+        administratorService.approveCompany(id);
+        return new ApiResponse("Company approved",companyService.findCompanyById(id),HttpStatus.CREATED);
     }
     @PostMapping("create-job-categories")
     public ApiResponse createCategories(JobCategories jobCategories){
@@ -39,7 +40,7 @@ public class AdministratorController {
         skills=administratorService.createSkills(skills);
         return new ApiResponse("skill created",skills,HttpStatus.CREATED);
     }
-    @PostMapping("/addRole")
+    @PostMapping("/add-role")
     public String addRole(@RequestParam String roleName){
         Roles roles = rolesService.getRoleByRoleName(roleName);
         if(roles == null){
@@ -50,8 +51,8 @@ public class AdministratorController {
         }
         return "Successfully Added " + roleName;
     }
-    @PutMapping("/{userId}/soft-delete")
-    public void softDelete(@PathVariable Long userId, boolean obj){
-        administratorService.softDelete(userId, obj);
+    @DeleteMapping("/soft-delete/{userId}")
+    public void softDelete(@PathVariable Long userId){
+        administratorService.softDelete(userId);
     }
 }

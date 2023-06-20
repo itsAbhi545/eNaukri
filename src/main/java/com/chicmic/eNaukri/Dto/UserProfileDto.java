@@ -15,6 +15,7 @@ import java.util.List;
 
 @Getter@Setter
 public class UserProfileDto {
+    private String fullName;
     private String currentCompany;
     private String cvPath;
     private String bio;

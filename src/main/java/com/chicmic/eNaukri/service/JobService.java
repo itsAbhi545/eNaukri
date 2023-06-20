@@ -5,7 +5,6 @@ import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -36,29 +35,61 @@ public class JobService {
     @PersistenceContext
     private EntityManager entityManager;
     UsersService usersService;
-    @Async public void saveJob(JobDto job,Long empId, Long companyId) {
-        String postedFor=companyRepo.findById(companyId).get().getName();
-        Employer employer=employerRepo.findById(empId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        if (!employer.getEmployerCompany().getName().equals(postedFor)){
-            throw new ApiException(HttpStatus.FORBIDDEN,"Employer doesn't belong to this company");
-        }
-        else{
-            Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
-            List<JobSkills> newJobSkillList = new ArrayList<>();
-            for (String jobSkillId : job.getSkillsList()) {
+
+    public Job getJobById(Long jobId) {
+        return jobRepo.findById(jobId).orElse(null);
+    }
+    public Job saveJob(JobDto job,Employer employer) {
+        String postedFor= employer.getCompany().getName();
+        Job newJob = CustomObjectMapper.convertDtoToObject(job,Job.class);
+        newJob.setActive(true);
+        newJob.setEmployer(employer);
+        List<JobSkills> newJobSkillList = new ArrayList<>();
+//        if(job.getOtherSkills() != null){
+//            for (String otherSkill : job.getOtherSkills()) {
+//
+//                Skills skills = Skills.builder()
+//                          .skillName(otherSkill)
+//                          .build();
+//                skills = skillsRepo.save(skills);
+//                JobSkills jobSkill = JobSkills.builder().skill(skills).job(newJob).build();
+//                newJobSkillList.add(jobSkill);
+//            }
+//        }else {
+        job.getSkillsList().addAll(job.getOtherSkills());
+        for (String jobSkillId : job.getSkillsList()) {
+            String st = jobSkillId.replaceAll("[^A-Za-z]", "");
+            Skills skills = Skills.builder().build();
+            if (st.equals("")) {
                 Long skillId = Long.valueOf(jobSkillId);
-                Skills skill=skillsRepo.findById(skillId).orElse(null);
-                JobSkills jobSkill = JobSkills.builder().jobSkill(skill).job(newJob).build();
-                if (skill != null) {
-                    newJobSkillList.add(jobSkill);
-                }
+
+                log.info("value = " + skillId);
+                skills = skillsRepo.findById(skillId).orElse(null);
+
+            } else {
+                skills = Skills.builder()
+                        .skillName(st)
+                        .build();
+                skills = skillsRepo.save(skills);
             }
-            System.out.println(newJobSkillList.get(0)+"job skill selected");
-            newJob.setJobSkillsList(newJobSkillList);
-            jobRepo.save(newJob);
-            List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
-            sendEmailNotifications(usersList,newJob);
+            JobSkills jobSkill = JobSkills.builder().skill(skills).job(newJob).build();
+            if (skills != null) {
+                newJobSkillList.add(jobSkill);
+            }
         }
+
+        newJob.setJobSkillsList(newJobSkillList);
+        newJob = jobRepo.save(newJob);
+        List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
+      //  sendEmailNotifications(usersList,newJob);
+        return newJob;
+
+
+    }
+    // Delete
+
+    public void deleteJob(Long id){
+        jobRepo.deleteById(id);
     }
     public List<Job> displayFilteredPaginatedJobs(String query, String location, String jobType, String postedOn,
                                                   String remoteHybridOnsite,Integer yoe,Integer salary,List<Long> skillIds) {
@@ -113,7 +144,7 @@ public class JobService {
         Collection<UserSkills> usersSet=new HashSet<>();
 
         jobSkillsList.forEach(jobSkills ->{
-            usersSet.addAll(userSkillsRepo.findBySkills(jobSkills.getJobSkill()));
+            usersSet.addAll(userSkillsRepo.findBySkills(jobSkills.getSkill()));
         } );
         Collection<String> usersCollection=new HashSet<>();
         usersSet.forEach(userSkills ->{
@@ -124,8 +155,8 @@ public class JobService {
     public void setStatus(Long jobId, boolean active, Principal principal) {
         Users user=usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such job exists"));
-        if(user.getEmployerProfile().getEmployerCompany()
-                .equals(job.getEmployer().getEmployerCompany())){
+        if(user.getEmployerProfile().getCompany()
+                .equals(job.getEmployer().getCompany())){
             job.setActive(active);
             jobRepo.save(job);
         }
@@ -136,16 +167,17 @@ public class JobService {
         List<JobSkills> requiredSkills=job.getJobSkillsList();
         Set<UserSkills> userSet=new HashSet<>();
         requiredSkills.forEach(jobSkillss ->{
-                  userSet.addAll(userSkillsRepo.findBySkills(jobSkillss.getJobSkill()));
+                  userSet.addAll(userSkillsRepo.findBySkills(jobSkillss.getSkill()));
         });
         List<Users> usersSet=new ArrayList<>();
         userSet.forEach(userSkills -> usersSet.add(userSkills.getUserProfile().getUsers()));
         System.out.println(usersSet);
         return usersSet;
     }
+    @Async
     private void sendEmailNotifications(List<Users> users, Job job) {
         for (Users users1 : users) {
-                String body = "Dear " + users1.getFullName() + ",\n"
+                String body = "Dear " + users1.getUserProfile().getFullName() + ",\n"
                         + "A new job matching your skills has been posted.\n"
                         + "Job Title: " + job.getJobTitle() + "\n"
                         + "Job Description: " + job.getJobDesc() + "\n"

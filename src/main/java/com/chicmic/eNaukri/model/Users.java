@@ -4,6 +4,7 @@ import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.validation.RegEx;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 //import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Email;
@@ -29,7 +30,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-@TrimAll
+//@TrimAll
 public class Users {
 
     @Id
@@ -39,15 +40,15 @@ public class Users {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    @NotNull
-    private String fullName;
+
 
     @Email
     @Pattern(regexp = RegEx.EMAIL)
+    @Column(unique = true)
     private String email;
     @Pattern(regexp = RegEx.PASSWORD,message = "")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
-    private String otp;
     @Column(columnDefinition = "boolean default false")
     private boolean isVerified;
     @UuidGenerator
@@ -69,11 +70,10 @@ public class Users {
     private Set<UserToken> userTokenSet=new HashSet<>();
 
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private  UserProfile userProfile;
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JsonIgnore
+    //@JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private  Employer employerProfile;
 }

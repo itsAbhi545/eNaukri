@@ -14,8 +14,8 @@ public class Preference {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String location;
-    private String salary;
-    private Long yoe;
+    private Float salary;
+    private Float yoe;
     private String remoteHybridOnsite;
     @OneToOne
     private UserProfile userPreferences;

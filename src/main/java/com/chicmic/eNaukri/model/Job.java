@@ -47,7 +47,7 @@ public class Job {
     private int numApplicants;
 
 //mappings
-    @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Application> applicationList =new ArrayList<>();
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
@@ -57,7 +57,8 @@ public class Job {
     @JsonIgnore
     private Company postFor;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+
+    @ManyToOne
     private Employer employer;
     @ManyToMany(cascade = CascadeType.REMOVE)
     private List<JobCategories> jobCategories=new ArrayList<>();

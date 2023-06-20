@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
@@ -10,6 +11,7 @@ import com.chicmic.eNaukri.repo.UserProfileRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
+import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -26,12 +28,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
+import static com.chicmic.eNaukri.config.SecurityConstants.EXPIRATION_TIME;
+import static com.chicmic.eNaukri.config.SecurityConstants.SECRET;
 
 @Service
 @RequiredArgsConstructor
@@ -56,19 +57,25 @@ public class UsersService {
     public Users register(Users newUser) {
         String uuid= UUID.randomUUID().toString();
         newUser.setUuid(uuid);
-        // Generate OTP
-        String otp =Integer.toString(new Random().nextInt(999999));
-        // Send OTP to user's email
-        String subject = "OTP for user registration";
-        String message = "Your OTP is: " + otp;
         newUser.setPassword(passwordEncoder().encode(newUser.getPassword()));
-        newUser.setOtp(otp);
         usersRepo.save(newUser);
+        String token = JwtUtils.createJwtToken(newUser.getUuid());
+        String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+newUser.getUuid();
+        String to= newUser.getEmail();
+        String subject="eNaukri job portal - Verify your account";
+        String body="Click the link to verify your account" +link;
+        sendEmail(to,subject,body);
         return newUser;
     }
+    public void verifyUserAccount(String token, String uuid){
+        String decodedToken = JwtUtils.verifyJwtToken(token);
+        Users user= usersRepo.findByUuid(uuid);
+        if(decodedToken==uuid){
+            user.setVerified(true);
+        }
+    }
 
-    @Async
-    public void sendEmail(String to, String subject, String body) {
+    @Async public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("harmanjyot.singh@chicmic.co.in");
         message.setTo(to);
@@ -88,11 +95,12 @@ public class UsersService {
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
-    public UserProfile createProfile(UserProfileDto dto, Principal principal,MultipartFile imgFile)
-            throws IOException {
+    public UserProfile createProfile(UserProfileDto dto, Principal principal)//, MultipartFile imgFile)
+            {
         Users user = usersRepo.findByEmail(principal.getName());
         UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
-        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
+        userProfile.setUsers(user);
+//        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
         List<UserSkills> userSkillsList=new ArrayList<>();
         for (Long skillId : dto.getSkillsList()) {
             Skills skill = skillsRepo.findById(skillId).orElse(null);
@@ -101,7 +109,15 @@ public class UsersService {
                 userSkillsList.add(userSkills);
             }
         }
+        for(Education ed:userProfile.getEducationList()){
+            ed.setEdUser(userProfile);
+        }
+        for(Experience ex:userProfile.getExperienceList()){
+            ex.setExpUser(userProfile);
+        }
+//        userProfile.getEduca;
         userProfile.setUserSkillsList(userSkillsList);
+        userProfileRepo.save(userProfile);
         user.setUserProfile(userProfile);
         return user.getUserProfile();
     }
