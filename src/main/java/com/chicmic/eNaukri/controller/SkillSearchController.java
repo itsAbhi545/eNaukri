@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-//@RestController
-//@RequiredArgsConstructor
-//public class SkillSearchController {
-//    private final SkillsService skillsService;
-//
-//    @GetMapping("search-skills")
-//    public List<Skills> displaySkills(@RequestParam String query){
-//        return skillsService.findBySkillName(query);
-//    }
-//}
+@RestController
+@RequiredArgsConstructor
+public class SkillSearchController {
+    private final SkillsService skillsService;
+
+    @GetMapping("search-skills")
+    public List<Skills> displaySkills(@RequestParam String query){
+        return skillsService.findBySkillName(query);
+    }
+}

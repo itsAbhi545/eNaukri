@@ -9,14 +9,19 @@ import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.model.Job;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.ApplicationRepo;
+import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.FileUploadUtil;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -66,7 +71,7 @@ public class ApplicationService {
                 job.setNumApplicants(job.getNumApplicants() + 1);
                 jobRepo.save(job);
                 String jobTitle = job.getJobTitle();
-                String company = job.getEmployer().getCompany().getName();
+                String company = job.getPostFor().getName();
                 sendEmailOnApplication(user.getEmail(), jobTitle, company);
             }
         }

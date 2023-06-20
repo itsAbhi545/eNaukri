@@ -30,7 +30,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println(request.getServletPath());
 
-        if(request.getServletPath().contains("/user/")||request.getServletPath().contains("/company/")
+        if(request.getServletPath().contains("/user/")||(request.getServletPath().contains("/company/")
+                && !request.getServletPath().contains("/company/signup"))
 
         ){
             String token=request.getHeader("Authorization").substring(7);
@@ -56,6 +57,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request,response);
             }
         }
-        else filterChain.doFilter(request,response);
+        else {
+            System.out.println("savhvsfajvfsaabjnbsfa");
+            filterChain.doFilter(request,response);
+        }
     }
 }

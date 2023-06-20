@@ -20,7 +20,6 @@ public class JobDto {
     private Long userId;
     private String jobTitle;
     private String jobDesc;
-    private boolean active;
     private String jobType;
     private String location;
     private String remoteHybridOnsite;
@@ -33,4 +32,5 @@ public class JobDto {
     private Float maxSalary;
     private List<String> skillsList;
     private List<String> otherSkills = new ArrayList<>();
+    private List<String> otherSkills = new ArrayList<String>();
 }

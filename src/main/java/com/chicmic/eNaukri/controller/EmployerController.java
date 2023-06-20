@@ -2,6 +2,8 @@ package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.model.Application;
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.Employer;
 import com.chicmic.eNaukri.model.Roles;
 import com.chicmic.eNaukri.model.UserRole;
 import com.chicmic.eNaukri.model.Users;
@@ -34,19 +36,16 @@ public class EmployerController {
     private final ApplicationService applicationService;
 
     @PostMapping("/signup")
-    public ApiResponse signup( String jsonString , @ModelAttribute MultipartFile userImg,
+    public ApiResponse signup(@Valid Users users, @ModelAttribute MultipartFile userImg,
                               @ModelAttribute MultipartFile companyImg) throws IOException {
         System.out.println("sdjhsgdfgsd");
-        ObjectMapper mapper = new ObjectMapper();
-        Users users = mapper.readValue(jsonString, Users.class);
-        users = employerService.saveEmployer(users, userImg, companyImg);
-        users = employerService.saveEmployer(users, userImg, companyImg);
-        Roles roles = rolesService.getRoleByRoleName("EMPLOYER");
-        UserRole userRole = UserRole.builder()
-                .userId(users)
-                .roleId(roles)
-                .build();
-        rolesService.saveUserRole(userRole);
+//        users = employerService.saveEmployer(users, userImg, companyImg);
+//        Roles roles = rolesService.getRoleByRoleName("EMPLOYER");
+//        UserRole userRole = UserRole.builder()
+//                .userId(users)
+//                .roleId(roles)
+//                .build();
+//        rolesService.saveUserRole(userRole);
         return new ApiResponse( "User Register Successfully as Employer", "users.getEmployerProfile()", HttpStatus.CREATED );
     }
     @PutMapping("/{appId}/send-invites")

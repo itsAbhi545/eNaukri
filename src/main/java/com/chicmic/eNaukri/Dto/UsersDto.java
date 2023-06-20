@@ -1,5 +1,8 @@
 package com.chicmic.eNaukri.Dto;
 
+import com.chicmic.eNaukri.model.Company;
+import com.chicmic.eNaukri.model.Employer;
+import com.chicmic.eNaukri.model.UserProfile;
 import com.chicmic.eNaukri.validation.RegEx;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,12 +24,15 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor public class UsersDto {
 
-    private String fullName;
+
     @Pattern(regexp = RegEx.EMAIL,message = "not a valid email")
     private String email;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "phone needs to be 10 digits")
     private String phoneNumber;
     private String password;
+    private Employer employerProfile;
+    private UserProfile userProfile;
+    private Long companyId;
 //    private String currentCompany;
 //    private String bio;
 

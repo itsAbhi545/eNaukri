@@ -1,23 +1,15 @@
 package com.chicmic.eNaukri.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
-import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.PreferenceRepo;
-import com.chicmic.eNaukri.repo.SkillsRepo;
-import com.chicmic.eNaukri.repo.UserProfileRepo;
+import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
-import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -26,13 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Random;
+import java.util.UUID;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
-import static com.chicmic.eNaukri.config.SecurityConstants.EXPIRATION_TIME;
-import static com.chicmic.eNaukri.config.SecurityConstants.SECRET;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +30,7 @@ import static com.chicmic.eNaukri.config.SecurityConstants.SECRET;
 public class UsersService {
     private final UsersRepo usersRepo;
     private final JavaMailSender javaMailSender;
-    private final FileUploadUtil fileUploadUtil;
-    private final UserProfileRepo userProfileRepo;
-    private final PreferenceRepo preferenceRepo;
-    private final SkillsRepo skillsRepo;
+
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);

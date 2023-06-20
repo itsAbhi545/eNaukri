@@ -16,10 +16,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-public class Employer {
+public class
+Employer {
     @Id
     @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    private String fullName;
+    private String designation;
     @NotNull
     private String fullName;
 

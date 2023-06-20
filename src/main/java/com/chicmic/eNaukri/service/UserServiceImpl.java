@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserDetailsService {
     private final CompanyRepo companyRepo;
     private final UserTokenRepo tokenRepo;
     private final RolesService rolesService;
+    private final EmployerService employerService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -101,6 +102,11 @@ public class UserServiceImpl implements UserDetailsService {
 //        if(!user.getEmployerProfile().getIsApproved()) {
 //            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
 //        }
+        if(!employerService.findByUsers(user).getIsApproved()) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
+        }
+
+
         UserRole userRole = rolesService.findUserRoleByUser(user);
         if(userRole.isDeleted()){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is Deleted");

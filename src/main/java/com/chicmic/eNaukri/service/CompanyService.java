@@ -26,6 +26,29 @@ public class CompanyService {
     private final JobRepo jobRepo;
     private final EmployerRepo employerRepo;
 
+    public Company save(Company company) {
+        //company.setApproved(false);
+        String uuid = UUID.randomUUID().toString();
+        company.setUuid(uuid);
+        return companyRepo.save(company);
+    }
+    public Company findByID(Long id) {
+        return companyRepo.findById(id).get();
+    }
+    public Company findByUUID(String uuid) {
+        return companyRepo.findByUuid(uuid);
+    }
+    public void approveCompany(Company company) {
+        company.setApproved(true);
+        String uuid = UUID.randomUUID().toString();
+        company.setUuid(uuid);
+        companyRepo.save(company);
+    }
+    public void disApproveCompany(Company company) {
+        company.setApproved(false);
+        companyRepo.save(company);
+    }
+
     public Job jobExistsForCompany(Long id, Long jobId) {
         Company company = companyRepo.findById(id).get();
         Job reqjob = jobRepo.findById(jobId).get();

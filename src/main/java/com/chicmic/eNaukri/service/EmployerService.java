@@ -4,6 +4,11 @@ import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.EmployerDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
+import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.model.*;
+import com.chicmic.eNaukri.repo.EmployerRepo;
+import com.chicmic.eNaukri.repo.PreferenceRepo;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,30 +31,50 @@ public class EmployerService {
     private final CompanyService companyService;
     private final PreferenceRepo preferenceRepo;
     private final EmployerRepo employerRepo;
+
+    private final PreferenceRepo preferenceRepo;
+    private final EmployerRepo employerRepo;
     private final UsersRepo usersRepo;
     private final JobRepo jobRepo;
     private final ApplicationRepo applicationRepo;
 
-
-    public Users saveEmployer(Users users , MultipartFile userImg,MultipartFile companyImg) throws IOException {
-        Employer employer = users.getEmployerProfile();
+    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
+        Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
-        Company company = users.getEmployerProfile().getCompany();
-
-        employer.setPpPath( FileUploadUtil.imageUpload(userImg));
+        Company company = companyService.findByID(usersDto.getCompanyId());
+        employer.setPpPath(FileUploadUtil.imageUpload(userImg));
         company.setPpPath(FileUploadUtil.imageUpload(companyImg));
-        Company companyIfExist = companyService.getCompanyByEmail(company.getEmail());
-        if(companyIfExist != null){
-            company = companyIfExist;
-        }
-        Set<Employer> employerSet = companyService.findEmployerByEmail(company.getEmail());
+
+        Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
         employerSet.add(employer);
         company.setEmployerSet(employerSet);
         employer.setCompany(company);
+        Users users = new Users();
+        BeanUtils.copyProperties(usersDto, users);
         employer.setUsers(users);
-        users.setEmployerProfile(employer);
-        return usersService.register(users);
+        usersService.register(users);
+        return employerRepo.save(employer);
+    }
 
+    //Search
+
+    public Set<Users> searchUsersForJob(Job job, Long[] skills){
+        Arrays.sort(skills);
+        List<UserProfile> userProfileList = preferenceRepo.searchUserPreferencesByJob(job);
+        Set<Users> usersSet = new HashSet<>();
+
+        userProfileList.forEach(userProfile -> {
+            userProfile.getUserSkillsList().forEach(userSkill -> {
+                if(Arrays.binarySearch(skills, userSkill.getUserSkillId()) >= 0){
+                    usersSet.add(userProfile.getUsers());
+                }
+            });
+
+        });
+        return usersSet;
+    }
+    public List<Employer> searchEmployers(String query) {
+        return employerRepo.findEmployersByAnyMatch(query);
     }
     public Application inviteForJob(Long appId, Principal principal){
         Application application=applicationRepo.findById(appId).get();
@@ -105,6 +131,12 @@ public class EmployerService {
         return employerRepo.findEmployersByAnyMatch(query);
     }
 
+
+
+
+    public Employer findByUsers(Users users){
+        return employerRepo.findByUsers(users);
+    }
 
 
 }

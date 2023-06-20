@@ -2,10 +2,14 @@ package com.chicmic.eNaukri.repo;
 
 import com.chicmic.eNaukri.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CompanyRepo extends JpaRepository<Company,Long> {
     Company findByName(String name);
-    Company findByEmail(String email);
+    @Query(
+            "select c from Company c where c.users.email = :email"
+    )
+    Company findByEmail(@Param("email") String email);
+    Company findByUuid(String uuid);
 }

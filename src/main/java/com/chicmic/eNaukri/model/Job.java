@@ -1,8 +1,6 @@
 package com.chicmic.eNaukri.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.persistence.*;
@@ -21,6 +19,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @RequiredArgsConstructor
 public class Job {
 
@@ -43,6 +43,7 @@ public class Job {
     private Float maxSalary;
 
     @Column(columnDefinition = "boolean default true")
+    @Column(columnDefinition = "BIT DEFAULT 1")
     private boolean active;
     private int numApplicants;
 
@@ -54,8 +55,9 @@ public class Job {
     private List<JobSkills> jobSkillsList =new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonIgnore
-    private Company postFor;
+    private List<JobSkills> jobSkillsList =new ArrayList<>();
 
 
     @ManyToOne

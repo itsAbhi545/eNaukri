@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.Dto.UserProfileDto;
+import com.chicmic.eNaukri.Dto.CompanyDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.UsersRepo;
@@ -20,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +30,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 
 @RestController
-@RequestMapping("/")
+//@RequestMapping("/")
 @RequiredArgsConstructor
 public class HomeController {
     private final CompanyService companyService;
@@ -40,6 +40,9 @@ public class HomeController {
     private final PasswordResetService passwordResetService;
     private final ResumeGenerator resumeGenerator;
     private final SkillsService skillsService;
+    private final CompanyService companyService;
+    private final RolesService rolesService;
+
 
     @GetMapping
     public String homePage(){
@@ -54,7 +57,7 @@ public class HomeController {
 //    public String userLogin(@RequestBody Map<Object,Object> map){
 //        return "login successful";
 //    }
-    @PostMapping("api/signup")
+    @PostMapping("/api/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse register(@Valid Users dto) {
         Users user=usersService.register(dto);

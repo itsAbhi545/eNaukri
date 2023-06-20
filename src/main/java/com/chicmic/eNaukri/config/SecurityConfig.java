@@ -59,17 +59,12 @@ public class SecurityConfig  {
             }
         });
     //csrf+session
-        http.csrf((csrf) -> csrf.disable());
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.csrf(csrf->csrf.disable());
         http.sessionManagement(sessionManagement->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     //permits
-//        http.authorizeHttpRequests().requestMatchers("/admin/**").hasRole("ADMIN");
-        http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
-        http.authorizeHttpRequests().anyRequest().permitAll();
-//        http.authorizeHttpRequests().requestMatchers("/user/**","/company/**").hasAnyAuthority("USER");
-//        http.authorizeHttpRequests().anyRequest().permitAll();
-
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/user/**").hasAnyAuthority("USER"));
+      //  http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/company/signup").permitAll());
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.anyRequest().permitAll());
     //adding filters
         http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
         http.addFilter(authenticationFilter);

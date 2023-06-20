@@ -1,6 +1,5 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
@@ -11,7 +10,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -177,7 +175,7 @@ public class JobService {
     @Async
     private void sendEmailNotifications(List<Users> users, Job job) {
         for (Users users1 : users) {
-                String body = "Dear " + users1.getUserProfile().getFullName() + ",\n"
+                String body = "Dear " + users1.getFullName() + ",\n"
                         + "A new job matching your skills has been posted.\n"
                         + "Job Title: " + job.getJobTitle() + "\n"
                         + "Job Description: " + job.getJobDesc() + "\n"

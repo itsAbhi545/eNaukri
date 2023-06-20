@@ -27,9 +27,13 @@ public class CompanyController {
     private final JobRepo jobRepo;
     private final CompanyRepo companyRepo;
     private final CompanyService companyService;
-    private final ApplicationService applicationService;
-    @Autowired JobService jobService;
-    SocialLinkService linkService;
+    private final JobService jobService;
+    private final EmployerService employerService;
+    private final RolesService rolesService;
+    private final SocialLinkService linkService;
+    private final UsersService usersService;
+
+
 
     @GetMapping("{id}")
     public Company companyPage(@PathVariable Long id){
@@ -39,9 +43,10 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("/postJob")
+    @PostMapping("postJob")
     public ApiResponse postJob(@RequestBody JobDto jobDto, Principal principal){
-        Employer employer = userService.getUserByEmail(principal.getName()).getEmployerProfile();
+
+        Employer employer = employerService.findByUsers(userService.getUserByEmail(principal.getName()));
         Job job = jobService.saveJob(jobDto, employer);
         return new ApiResponse("Job successfully posted", job, HttpStatus.CREATED);
     }
@@ -66,5 +71,29 @@ public class CompanyController {
     public ApiResponse getapplications(Principal principal, @PathVariable Long jobId){
         return new ApiResponse("Applications for the job",companyService.getApplicants(principal,jobId),HttpStatus.OK);
     }
+
+    @PostMapping("/signup")
+    public ApiResponse signUp(@RequestBody CompanyDto companyDto){
+
+        Users users = Users.builder()
+                .email(companyDto.getEmail())
+                .password(companyDto.getPassword())
+                .phoneNumber(companyDto.getPhoneNumber()).build();
+        users = usersService.register(users);
+        companyDto.getCompany().setUsers(users);
+        Company company = companyService.save(companyDto.getCompany());
+        //Role
+        Roles roles = rolesService.getRoleByRoleName("Company");
+        UserRole userRole = UserRole.builder()
+                .userId(users)
+                .roleId(roles)
+                .build();
+        rolesService.saveUserRole(userRole);
+
+        return new ApiResponse("Company " + users.getEmail() + " Register Successfully", company, HttpStatus.CREATED);
+    }
+    //Search
+
+
 
 }

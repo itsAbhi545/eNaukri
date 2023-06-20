@@ -22,7 +22,6 @@ public class UserSkills {
     private UserProfile userProfile;
 
     @ManyToOne
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Skills skills;
 
 }

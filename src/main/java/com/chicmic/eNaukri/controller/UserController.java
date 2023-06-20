@@ -44,6 +44,12 @@ public class UserController {
         usersService.updateUser(user,imgFile,resumeFile);
         return ResponseEntity.ok("updated successfully");
     }
+    @PostMapping("/update-profile")
+    public ResponseEntity<String> updateAll(Users users) {
+        //usersService.updateUser(user,imgFile,resumeFile);
+
+        return ResponseEntity.ok("updated successfully");
+    }
     @PostMapping("/create-preferences")
     public ApiResponse createPreference(Principal principal,@RequestBody Preference dto){
         Preference preference=usersService.createPreferences(principal, dto);
