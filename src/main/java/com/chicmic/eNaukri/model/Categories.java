@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Getter@Setter
-
+@TrimAll
 @NoArgsConstructor
 @AllArgsConstructor
 public class Categories {

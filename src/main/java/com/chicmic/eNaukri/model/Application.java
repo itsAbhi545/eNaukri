@@ -33,7 +33,7 @@ public class Application {
     @ManyToOne
     @JsonIgnore
     private Job jobId;
-    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private ApplicationStatus applicationStatus;

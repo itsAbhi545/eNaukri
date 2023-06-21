@@ -21,7 +21,7 @@ import java.util.List;
 
 
 @RestController
-//@RequestMapping("/")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class HomeController {
     private final CompanyService companyService;
@@ -80,7 +80,7 @@ public class HomeController {
                                  @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite,
                                  @RequestParam(required = false,name = "yoe") Integer yoe,
                                  @RequestParam(required = false,name = "salary") Integer salary,
-                                 @RequestParam(required = false,name = "skills") List<Long> skillIds){
+                                 @ModelAttribute(name = "skills") List<Long> skillIds){
         return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite,yoe,salary,skillIds);
     }
 

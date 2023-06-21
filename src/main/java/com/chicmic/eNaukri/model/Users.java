@@ -44,6 +44,7 @@ public class Users {
     @Email
     @Pattern(regexp = RegEx.EMAIL)
     @Column(unique = true)
+    @NotNull
     private String email;
     @Pattern(regexp = RegEx.PASSWORD,message = "")
     private String password;

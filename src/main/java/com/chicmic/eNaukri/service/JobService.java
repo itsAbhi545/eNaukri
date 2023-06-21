@@ -117,16 +117,21 @@ public class JobService {
         }
         Predicate workTypeQuery=(!StringUtils.isEmpty(remoteHybridOnsite))?builder.equal(root.get("remoteHybridOnsite"),remoteHybridOnsite):builder.like(root.get("remoteHybridOnsite"),"%%");
         Predicate activeJobs=builder.isTrue(root.get("active"));
-        Predicate yoeQuery = (yoe != null) ? builder.equal(root.get("minYear"), yoe) : builder.conjunction();
+        Predicate yoeQuery = (yoe != null) ? builder.lessThanOrEqualTo(root.get("minYear"), yoe) : builder.conjunction();
 // Create predicate for salary filter
         Predicate salaryQuery = (salary != null) ? builder.and(
-                builder.greaterThanOrEqualTo(root.get("minSalary"), salary),
-                builder.lessThanOrEqualTo(root.get("maxSalary"), salary)
+                builder.greaterThanOrEqualTo(root.get("maxSalary"), salary),
+                builder.lessThanOrEqualTo(root.get("minSalary"), salary)
         ) : builder.conjunction();
         // Create predicate for skill IDs filter
-        Join<Job, Skills> skillJoin = root.join("skills", JoinType.INNER);
-        Predicate skillQuery = (!skillIds.isEmpty()) ? skillJoin.get("id").in(skillIds) : builder.conjunction();
-
+        //        Join<Job, Skills> skillJoin = root.join("skills", JoinType.INNER);
+        //        Predicate skillQuery = (!skillIds.isEmpty()) ? skillJoin.get("id").in(skillIds) : builder.conjunction();
+        Predicate skillQuery = builder.conjunction();
+        if (!skillIds.isEmpty()) {
+            Join<Job, JobSkills> skillJoin = root.join("jobSkillsList", JoinType.INNER);
+            Expression<Long> skillIdExpression = skillJoin.get("skill").get("skillId");
+            skillQuery = skillIdExpression.in(skillIds);
+        }
 
 
         //building query

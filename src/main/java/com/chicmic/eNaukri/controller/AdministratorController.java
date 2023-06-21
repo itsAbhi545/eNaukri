@@ -20,7 +20,7 @@ public class AdministratorController {
     private final RolesService rolesService;
     private final CompanyService companyService;
     @PostMapping("create-application-status")
-    public ApiResponse createApplicationStatus(ApplicationStatus applicationStatus){
+    public ApiResponse createApplicationStatus(@RequestBody ApplicationStatus applicationStatus){
          applicationStatus=administratorService.createApplicationStatus(applicationStatus);
         return new ApiResponse("Created new status",applicationStatus,HttpStatus.CREATED);
     }
@@ -30,7 +30,7 @@ public class AdministratorController {
         return new ApiResponse("Company approved",companyService.findCompanyById(id),HttpStatus.CREATED);
     }
     @PostMapping("create-job-categories")
-    public ApiResponse createCategories(Categories categories){
+    public ApiResponse createCategories(@RequestBody Categories categories){
         categories =administratorService.createCategories(categories);
         return new ApiResponse("created new category", categories,HttpStatus.CREATED);
     }

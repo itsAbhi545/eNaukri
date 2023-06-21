@@ -39,21 +39,21 @@ public class CompanyService {
                 .phoneNumber(companyDto.getPhoneNumber()).build();
         users = usersService.register(users);
         companyDto.getCompany().setUsers(users);
-        Company company = save(companyDto.getCompany());
-        List<Categories> categoriesList=categoriesRepo.findAllById(companyDto.getCategories());
-        List<CompanyCategories> companyCategoriesList = new ArrayList<>();
-        for(Categories category : categoriesList){
-            companyCategoriesList.add(new CompanyCategories(null, company, category));
-        }
-        companyCategoriesRepo.saveAll(companyCategoriesList);
-        //Role
-        Roles roles = rolesService.getRoleByRoleName("Company");
-        UserRole userRole = UserRole.builder()
-                .userId(users)
-                .roleId(roles)
-                .build();
-        rolesService.saveUserRole(userRole);
-        return company;
+       // Company company = save(companyDto.getCompany());
+//        List<Categories> categoriesList=categoriesRepo.findAllById(companyDto.getCategories());
+//        List<CompanyCategories> companyCategoriesList = new ArrayList<>();
+//        for(Categories category : categoriesList){
+//            companyCategoriesList.add(new CompanyCategories(null, company, category));
+//        }
+//        companyCategoriesRepo.saveAll(companyCategoriesList);
+//        //Role
+//        Roles roles = rolesService.getRoleByRoleName("Company");
+//        UserRole userRole = UserRole.builder()
+//                .userId(users)
+//                .roleId(roles)
+//                .build();
+//        rolesService.saveUserRole(userRole);
+        return null;
     }
     public Company findByID(Long id) {
         return companyRepo.findById(id).get();

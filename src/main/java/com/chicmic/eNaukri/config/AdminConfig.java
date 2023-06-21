@@ -29,13 +29,14 @@ public class AdminConfig {
                     .uuid(uuid)
                     .isVerified(true)
                     .build();
-            Roles roles = rolesService.getRoleByRoleName("EMPLOYER");
+            userService.saveUser(admin);
+            Roles roles = rolesService.getRoleByRoleName("ADMIN");
             UserRole userRole = UserRole.builder()
                     .userId(admin)
                     .roleId(roles)
                     .build();
             rolesService.saveUserRole(userRole);
-            userService.saveUser(admin);
+
         }
     }
 }
