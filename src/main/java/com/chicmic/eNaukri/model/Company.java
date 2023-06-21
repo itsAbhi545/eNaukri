@@ -36,6 +36,8 @@ Company {
 
 //    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
 //    private Set<Job> jobList=new HashSet<>();
+
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private Users users;

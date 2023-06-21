@@ -1,13 +1,9 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
-import com.chicmic.eNaukri.model.Application;
-import com.chicmic.eNaukri.model.Company;
-import com.chicmic.eNaukri.model.Employer;
-import com.chicmic.eNaukri.model.Job;
-import com.chicmic.eNaukri.repo.CompanyRepo;
-import com.chicmic.eNaukri.repo.EmployerRepo;
-import com.chicmic.eNaukri.repo.JobRepo;
+import com.chicmic.eNaukri.Dto.CompanyDto;
+import com.chicmic.eNaukri.model.*;
+import com.chicmic.eNaukri.repo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.shaded.org.checkerframework.checker.units.qual.C;
@@ -21,16 +17,43 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class CompanyService {
+    private final CompanyCategoriesRepo companyCategoriesRepo;
 
     private final CompanyRepo companyRepo;
     private final JobRepo jobRepo;
     private final EmployerRepo employerRepo;
+    private final UsersService usersService;
+    private final RolesService rolesService;
+    private final CategoriesRepo categoriesRepo;
 
     public Company save(Company company) {
         //company.setApproved(false);
         String uuid = UUID.randomUUID().toString();
         company.setUuid(uuid);
         return companyRepo.save(company);
+    }
+    public Company companySignup(CompanyDto companyDto){
+        Users users = Users.builder()
+                .email(companyDto.getEmail())
+                .password(companyDto.getPassword())
+                .phoneNumber(companyDto.getPhoneNumber()).build();
+        users = usersService.register(users);
+        companyDto.getCompany().setUsers(users);
+        Company company = save(companyDto.getCompany());
+        List<Categories> categoriesList=categoriesRepo.findAllById(companyDto.getCategories());
+        List<CompanyCategories> companyCategoriesList = new ArrayList<>();
+        for(Categories category : categoriesList){
+            companyCategoriesList.add(new CompanyCategories(null, company, category));
+        }
+        companyCategoriesRepo.saveAll(companyCategoriesList);
+        //Role
+        Roles roles = rolesService.getRoleByRoleName("Company");
+        UserRole userRole = UserRole.builder()
+                .userId(users)
+                .roleId(roles)
+                .build();
+        rolesService.saveUserRole(userRole);
+        return company;
     }
     public Company findByID(Long id) {
         return companyRepo.findById(id).get();

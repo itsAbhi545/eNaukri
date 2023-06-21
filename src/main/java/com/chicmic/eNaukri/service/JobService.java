@@ -32,7 +32,7 @@ public class JobService {
     private final SkillsRepo skillsRepo;
     private final EmployerRepo employerRepo;
     private final EmployerService employerService;
-    private final JobCategoriesRepo jobCategoriesRepo;
+    private final CategoriesRepo categoriesRepo;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -47,11 +47,11 @@ public class JobService {
         newJob.setActive(true);
         newJob.setEmployer(employer);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-        List<JobCategories> jobCategoriesList=new ArrayList<>();
+        List<Categories> categoriesList =new ArrayList<>();
         if(job.getJobCategories() != null){
             for (Long jc : job.getJobCategories()) {
-                JobCategories jobCategories = jobCategoriesRepo.findById(jc).get();
-                jobCategoriesList.add(jobCategories);
+                Categories categories = categoriesRepo.findById(jc).get();
+                categoriesList.add(categories);
             }
         }
 //        else {
@@ -76,7 +76,7 @@ public class JobService {
                 newJobSkillList.add(jobSkill);
             }
         }
-        newJob.setJobCategories(jobCategoriesList);
+        newJob.setCategories(categoriesList);
         newJob.setJobSkillsList(newJobSkillList);
         newJob = jobRepo.save(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
@@ -199,7 +199,7 @@ public class JobService {
     public void deletePostedJob(Long jobId){
         jobRepo.deleteById(jobId);
     }
-    public List<JobCategories> showJobCategories(){
-        return jobCategoriesRepo.findAll();
+    public List<Categories> showJobCategories(){
+        return categoriesRepo.findAll();
     }
 }

@@ -1,12 +1,8 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
-import com.chicmic.eNaukri.Dto.UserProfileDto;
-import com.chicmic.eNaukri.Dto.CompanyDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.JobCategoriesRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.service.*;
 import com.itextpdf.text.DocumentException;
 import jakarta.mail.MessagingException;
@@ -16,18 +12,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 
 @RestController
@@ -122,7 +112,7 @@ public class HomeController {
         return new ApiResponse("List of Jobs",companyService.getJobsForCompany(companyId),HttpStatus.OK);
     }
     @GetMapping("job-categories")
-    public List<JobCategories> showCategories(){
+    public List<Categories> showCategories(){
         return jobService.showJobCategories();
     }
 }

@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.*;
 
 @Entity
 @Getter
@@ -28,5 +27,5 @@ public class Skills {
     @OneToMany(mappedBy = "skill",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<JobSkills> jobSkillsList=new ArrayList<>();
     @ManyToOne
-    JobCategories jobCategories;
+    Categories categories;
 }
