@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
@@ -10,6 +11,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
@@ -29,6 +31,8 @@ public class JobService {
     private final UserSkillsRepo userSkillsRepo;
     private final SkillsRepo skillsRepo;
     private final EmployerRepo employerRepo;
+    private final EmployerService employerService;
+    private final JobCategoriesRepo jobCategoriesRepo;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -43,17 +47,14 @@ public class JobService {
         newJob.setActive(true);
         newJob.setEmployer(employer);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-//        if(job.getOtherSkills() != null){
-//            for (String otherSkill : job.getOtherSkills()) {
-//
-//                Skills skills = Skills.builder()
-//                          .skillName(otherSkill)
-//                          .build();
-//                skills = skillsRepo.save(skills);
-//                JobSkills jobSkill = JobSkills.builder().skill(skills).job(newJob).build();
-//                newJobSkillList.add(jobSkill);
-//            }
-//        }else {
+        List<JobCategories> jobCategoriesList=new ArrayList<>();
+        if(job.getJobCategories() != null){
+            for (Long jc : job.getJobCategories()) {
+                JobCategories jobCategories = jobCategoriesRepo.findById(jc).get();
+                jobCategoriesList.add(jobCategories);
+            }
+        }
+//        else {
         job.getSkillsList().addAll(job.getOtherSkills());
         for (String jobSkillId : job.getSkillsList()) {
             String st = jobSkillId.replaceAll("[^A-Za-z]", "");
@@ -75,7 +76,7 @@ public class JobService {
                 newJobSkillList.add(jobSkill);
             }
         }
-
+        newJob.setJobCategories(jobCategoriesList);
         newJob.setJobSkillsList(newJobSkillList);
         newJob = jobRepo.save(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
@@ -153,7 +154,7 @@ public class JobService {
     public void setStatus(Long jobId, boolean active, Principal principal) {
         Users user=usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"No such job exists"));
-        if(user.getEmployerProfile().getCompany()
+        if(employerService.findByUsers(user).getCompany()
                 .equals(job.getEmployer().getCompany())){
             job.setActive(active);
             jobRepo.save(job);
@@ -175,7 +176,7 @@ public class JobService {
     @Async
     private void sendEmailNotifications(List<Users> users, Job job) {
         for (Users users1 : users) {
-                String body = "Dear " + users1.getFullName() + ",\n"
+                String body = "Dear " + usersService.getUserProfile(users1).getFullName() + ",\n"
                         + "A new job matching your skills has been posted.\n"
                         + "Job Title: " + job.getJobTitle() + "\n"
                         + "Job Description: " + job.getJobDesc() + "\n"
@@ -197,5 +198,8 @@ public class JobService {
     }
     public void deletePostedJob(Long jobId){
         jobRepo.deleteById(jobId);
+    }
+    public List<JobCategories> showJobCategories(){
+        return jobCategoriesRepo.findAll();
     }
 }

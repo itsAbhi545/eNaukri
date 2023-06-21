@@ -31,12 +31,10 @@ public class EmployerService {
     private final CompanyService companyService;
     private final PreferenceRepo preferenceRepo;
     private final EmployerRepo employerRepo;
-
-    private final PreferenceRepo preferenceRepo;
-    private final EmployerRepo employerRepo;
     private final UsersRepo usersRepo;
     private final JobRepo jobRepo;
     private final ApplicationRepo applicationRepo;
+
 
     public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
         Employer employer = usersDto.getEmployerProfile();
@@ -81,18 +79,18 @@ public class EmployerService {
         Users invitedUser=application.getApplicantId().getUsers();
         Job job=jobRepo.findById(application.getJobId().getJobId())
                 .orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job not found or deleted"));
-        List<Job> jobs=invitedUser.getUserProfile().getInvitedJobs();
+        List<Job> jobs=usersService.getUserProfile(invitedUser).getInvitedJobs();
         List<UserProfile> invitedUsers=job.getInvitedUsers();
         Users employer=usersService.getUserByEmail(principal.getName());
-        Set<Job> postedJobs=employer.getEmployerProfile().getJobList();
+        Set<Job> postedJobs=findByUsers(employer).getJobList();
         if(!postedJobs.contains(job)){
             throw new ApiException(HttpStatus.FORBIDDEN,"Not allowed to send invites for this job");
         }
         if(job.isActive()&& postedJobs.contains(job)){
             jobs.add(job);
-            invitedUsers.add(invitedUser.getUserProfile());
+            invitedUsers.add(usersService.getUserProfile(invitedUser));
             String to=invitedUser.getEmail();
-            String subject="Invitation to apply for a job opening at "+ employer.getEmployerProfile().getCompany().getName();
+            String subject="Invitation to apply for a job opening at "+ findByUsers(employer).getCompany().getName();
             String body = "You have been invited to apply for the job at"+ job.getEmployer().getCompany().getName()+" for " +
                     "the role of "+job.getJobTitle();
             usersService.sendEmail(to,subject,body);
@@ -104,7 +102,7 @@ public class EmployerService {
         Job job=jobRepo.findById(jobId)
                 .orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job not found or deleted"));
         Users employer=usersService.getUserByEmail(principal.getName());
-        Set<Job> postedJobs=employer.getEmployerProfile().getJobList();
+        Set<Job> postedJobs=findByUsers(employer).getJobList();
         if(!postedJobs.contains(job)){
             throw new ApiException(HttpStatus.FORBIDDEN,"Not allowed to see applicants for this job");
         }
@@ -113,23 +111,23 @@ public class EmployerService {
 
     //Search
 
-    public Set<Users> searchUsersForJob(Job job, Long[] skills){
-        Arrays.sort(skills);
-        List<UserProfile> userProfileList = preferenceRepo.searchUserPreferencesByJob(job);
-        Set<Users> usersSet = new HashSet<>();
-
-        userProfileList.forEach(userProfile -> {
-            userProfile.getUserSkillsList().forEach(userSkill -> {
-                if(Arrays.binarySearch(skills, userSkill.getUserSkillId()) >= 0){
-                    usersSet.add(userProfile.getUsers());
-                }
-            });
-        });
-        return usersSet;
-    }
-    public List<Employer> searchEmployers(String query) {
-        return employerRepo.findEmployersByAnyMatch(query);
-    }
+//    public Set<Users> searchUsersForJob(Job job, Long[] skills){
+//        Arrays.sort(skills);
+//        List<UserProfile> userProfileList = preferenceRepo.searchUserPreferencesByJob(job);
+//        Set<Users> usersSet = new HashSet<>();
+//
+//        userProfileList.forEach(userProfile -> {
+//            userProfile.getUserSkillsList().forEach(userSkill -> {
+//                if(Arrays.binarySearch(skills, userSkill.getUserSkillId()) >= 0){
+//                    usersSet.add(userProfile.getUsers());
+//                }
+//            });
+//        });
+//        return usersSet;
+//    }
+//    public List<Employer> searchEmployers(String query) {
+//        return employerRepo.findEmployersByAnyMatch(query);
+//    }
 
 
 

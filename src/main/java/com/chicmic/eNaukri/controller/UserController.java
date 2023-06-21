@@ -84,21 +84,21 @@ public class UserController {
         applicationService.applyForJob(application,principal,jobId);
         return ResponseEntity.ok("Successfully applied to the job");
     }
-    @GetMapping("{id}/unsubscribe")
+    @GetMapping("unsubscribe/{id}")
     public String unsubscribe(Principal principal){
         userService.changeAlerts(principal,false);
         return "Unsubscribed !";
     }
-    @GetMapping("{id}/subscribe")
+    @GetMapping("subscribe/{id}")
     public String subscribe(Principal principal){
         userService.changeAlerts(principal,true);
         return "Subscribed !";
     }
-    @GetMapping("{id}/currentCompany")
+    @GetMapping("current-company/{id}")
     public String currentCompany(@PathVariable("id") Long id){
         return userService.findCurrentCompany(id);
     }
-    @GetMapping("{jobId}/checkApplication")
+    @GetMapping("check-application/{jobId}")
     public String check(Principal p, @PathVariable("jobId") Long jobId){
         userService.checkJobForUser(p, jobId);
         return "";
@@ -111,7 +111,7 @@ public class UserController {
     public String numApplicants(@PathVariable Long jobId){
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
-    @PostMapping("{userid}/addSocialLinks")
+    @PostMapping("add-socialLinks/{userid}")
     public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
         linkService.addSocialLinks(userId, dto,null);
         return ResponseEntity.ok("Added social links");
@@ -128,8 +128,8 @@ public class UserController {
         return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
     @PostMapping("/create-profile")
-    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto){
-        UserProfile up=usersService.createProfile(dto, principal);//,imgFile);
+    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile) throws IOException {
+        UserProfile up=usersService.createProfile(dto, principal,imgFile);
         return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
     }
 

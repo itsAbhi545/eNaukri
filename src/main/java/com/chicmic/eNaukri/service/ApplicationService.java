@@ -49,6 +49,7 @@ public class ApplicationService {
     private final EmployerRepo employerRepo;
     private final ApplicationStatusRepo statusRepo;
     private final UsersService usersService;
+    private final EmployerService employerService;
     public void applyForJob(ApplicationDto application, Principal principal, Long jobId)
             throws IOException, MessagingException, ApiException {
 
@@ -71,7 +72,7 @@ public class ApplicationService {
                 job.setNumApplicants(job.getNumApplicants() + 1);
                 jobRepo.save(job);
                 String jobTitle = job.getJobTitle();
-                String company = job.getPostFor().getName();
+                String company = job.getEmployer().getCompany().getName();
                 sendEmailOnApplication(user.getEmail(), jobTitle, company);
             }
         }
@@ -93,7 +94,7 @@ public class ApplicationService {
     }
     public List<Application> viewApplications(Principal principal){
         Users user = usersRepo.findByEmail(principal.getName());
-        List<Application> applications=user.getUserProfile().getApplicationList();
+        List<Application> applications=usersService.getUserProfile(user).getApplicationList();
         return applications;
     }
     public void deleteYourApplication(Long appId){
@@ -103,7 +104,7 @@ public class ApplicationService {
         Job job=jobRepo.findById(jobId)
                 .orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job not found or deleted"));
         Users employer=usersService.getUserByEmail(principal.getName());
-        Set<Job> postedJobs=employer.getEmployerProfile().getJobList();
+        Set<Job> postedJobs=employerService.findByUsers(employer).getJobList();
         if(!postedJobs.contains(job)){
             throw new ApiException(HttpStatus.FORBIDDEN,"Not allowed to see applicants for this job");
         }
@@ -124,7 +125,7 @@ public class ApplicationService {
             application.setApplicationStatus(status);
             String to=application.getEmail();
             String subject="Regarding status of your application for "+job.getJobTitle();
-            String body="Your application for "+job.getJobTitle()+",at "+job.getPostFor().getName()+
+            String body="Your application for "+job.getJobTitle()+",at "+job.getEmployer().getCompany().getName()+
                     " has been "+status.getMessage();
             usersService.sendEmail(to,subject,body);
             return application;

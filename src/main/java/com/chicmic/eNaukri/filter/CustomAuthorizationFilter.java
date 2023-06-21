@@ -6,6 +6,7 @@ import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.model.Authority;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,10 +43,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 new ObjectMapper().writeValue(response.getOutputStream(),error);
             }
             else if(token!=null) {
-                String user = JWT.require(Algorithm.HMAC256(SECRET.getBytes()))
-                        .build()
-                        .verify(token)
-                        .getSubject();
+                String user = JwtUtils.verifyJwtToken(token);
                 System.out.println(user+"/jefgegfyugeryfg");
                 Users temp= userService.getUserByEmail(user);
                 Collection<Authority> authorities=new ArrayList<>();

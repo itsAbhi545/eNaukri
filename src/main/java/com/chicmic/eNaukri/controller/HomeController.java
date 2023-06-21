@@ -5,6 +5,7 @@ import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.CompanyDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
+import com.chicmic.eNaukri.repo.JobCategoriesRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.service.*;
 import com.itextpdf.text.DocumentException;
@@ -40,7 +41,6 @@ public class HomeController {
     private final PasswordResetService passwordResetService;
     private final ResumeGenerator resumeGenerator;
     private final SkillsService skillsService;
-    private final CompanyService companyService;
     private final RolesService rolesService;
 
 
@@ -120,5 +120,9 @@ public class HomeController {
     @GetMapping("jobs-by-company/{companyId}")
     public ApiResponse getJobsByCompany(@PathVariable Long companyId){
         return new ApiResponse("List of Jobs",companyService.getJobsForCompany(companyId),HttpStatus.OK);
+    }
+    @GetMapping("job-categories")
+    public List<JobCategories> showCategories(){
+        return jobService.showJobCategories();
     }
 }

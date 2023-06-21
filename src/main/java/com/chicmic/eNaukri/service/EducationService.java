@@ -3,10 +3,10 @@ package com.chicmic.eNaukri.service;
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UserEducationDto;
 import com.chicmic.eNaukri.model.Education;
-import com.chicmic.eNaukri.model.UserEducation;
+
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.EducationRepo;
-import com.chicmic.eNaukri.repo.UserEducationRepo;
+
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,12 +25,12 @@ import java.util.Optional;
     UsersRepo usersRepo;
     @Autowired
     EducationRepo educationRepo;
-    @Autowired
-    UserEducationRepo userEducationRepo;
+//    @Autowired
+//    UserEducationRepo userEducationRepo;
     @Autowired
     UsersService usersService;
-    public void addEducation(UserEducationDto dto,Long userId){
-        Users user=usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+    public void addEducation(UserEducationDto dto,Principal principal){
+        Users user=usersRepo.findByEmail(principal.getName());
         boolean hasDuplicateDegree = usersService.getUserProfile(user).getEducationList().stream()
                 .anyMatch(e -> e.getDegree().equalsIgnoreCase(dto.getDegree()));
         if (hasDuplicateDegree) {
@@ -50,9 +50,6 @@ import java.util.Optional;
             education.setStudent(true);
         }
         education.setEdUser(usersService.getUserProfile(user));
-        UserEducation userEducation=new UserEducation();
-        userEducation.setEducation(education);
-        userEducation.setUser(user);
         educationRepo.save(education);
 
     }

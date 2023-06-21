@@ -24,13 +24,9 @@ public class ExperienceService {
     private final ExperienceRepo experienceRepo;
     private final UserExperienceRepo userExperienceRepo;
     private final UsersService usersService;
-    public void addExperience(Long userId, UserExperienceDto dto){
-        Users user=usersRepo.findById(userId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-        boolean hasDuplicateJoinedDate = usersService.getUserProfile(user).getExperienceList().stream()
-                .anyMatch(e -> e.getJoinedOn().equals(dto.getJoinedOn()));
     public void addExperience(Principal principal, UserExperienceDto dto){
         Users user=usersRepo.findByEmail(principal.getName());
-        boolean hasDuplicateJoinedDate = user.getUserProfile().getExperienceList().stream()
+        boolean hasDuplicateJoinedDate = usersService.getUserProfile(user).getExperienceList().stream()
                 .anyMatch(e -> (e.getJoinedOn().isBefore(dto.getJoinedOn()) && e.getEndedOn().isAfter(dto.getJoinedOn()))
                     || (e.getJoinedOn().isBefore(dto.getEndedOn()) && e.getEndedOn().isAfter(dto.getEndedOn()))
                 );

@@ -38,7 +38,8 @@ public class AdminController {
     public ApiResponse searchEmployers(@RequestParam(value = "query") String query) {
         List<Employer> employerList = employerService.searchEmployers(query);
         return new ApiResponse("Generated Employers List",employerList, HttpStatus.OK);
-    }@GetMapping("/search/users")
+    }
+    @GetMapping("/search/users")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse searchUsers(@RequestParam(value = "query") String query) {
         List<UserProfile> userProfileList = usersService.searchUser(query);
@@ -63,5 +64,4 @@ public class AdminController {
         companyService.disApproveCompany(companyService.findByID(id));
         return new ApiResponse("Company DisApproved Successfully",null, HttpStatus.OK);
     }
-
 }

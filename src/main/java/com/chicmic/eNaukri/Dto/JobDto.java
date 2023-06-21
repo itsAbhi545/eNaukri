@@ -32,5 +32,5 @@ public class JobDto {
     private Float maxSalary;
     private List<String> skillsList;
     private List<String> otherSkills = new ArrayList<>();
-    private List<String> otherSkills = new ArrayList<String>();
+    private List<Long> jobCategories;
 }

@@ -40,6 +40,7 @@ public class AdministratorService {
         return jobCategories;
     }
     public Skills createSkills(Skills dto){
+        dto.setSkillName(dto.getSkillName().toLowerCase());
         if(skillsRepo.existsBySkillName(dto.getSkillName())){
             throw new ApiException(HttpStatus.CONFLICT,"A skill by the same skill name exists");
         }

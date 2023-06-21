@@ -13,9 +13,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 
 public class Skills {
 

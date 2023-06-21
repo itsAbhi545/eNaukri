@@ -25,13 +25,6 @@ public class EmployerSearchController {
         return new ApiResponse("Relevant User List Created Successfully", usersSet, HttpStatus.CREATED);
     }
 
-    @GetMapping("jobs")
-    public List<Job> displayJobs(@RequestParam(required = false,name = "q") String query,
-                                 @RequestParam(required = false,name = "location") String location,
-                                 @RequestParam(required = false,name = "type") String jobType,
-                                 @RequestParam(required = false,name = "postedOn") String postedOn,
-                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite){
-        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite);
-    }
+
 
 }

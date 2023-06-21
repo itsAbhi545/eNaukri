@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
+import com.chicmic.eNaukri.Dto.CompanyDto;
 import com.chicmic.eNaukri.Dto.JobDto;
 import com.chicmic.eNaukri.Dto.SocialLinkDto;
 import com.chicmic.eNaukri.model.*;
@@ -43,7 +44,7 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("postJob")
+    @PostMapping("post-job")
     public ApiResponse postJob(@RequestBody JobDto jobDto, Principal principal){
 
         Employer employer = employerService.findByUsers(userService.getUserByEmail(principal.getName()));
@@ -74,7 +75,6 @@ public class CompanyController {
 
     @PostMapping("/signup")
     public ApiResponse signUp(@RequestBody CompanyDto companyDto){
-
         Users users = Users.builder()
                 .email(companyDto.getEmail())
                 .password(companyDto.getPassword())
@@ -89,7 +89,6 @@ public class CompanyController {
                 .roleId(roles)
                 .build();
         rolesService.saveUserRole(userRole);
-
         return new ApiResponse("Company " + users.getEmail() + " Register Successfully", company, HttpStatus.CREATED);
     }
     //Search

@@ -1,10 +1,15 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
-import com.chicmic.eNaukri.model.Users;
+import com.chicmic.eNaukri.model.*;
+import com.chicmic.eNaukri.repo.PreferenceRepo;
+import com.chicmic.eNaukri.repo.SkillsRepo;
+import com.chicmic.eNaukri.repo.UserProfileRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
+import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -18,7 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -30,16 +38,16 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 public class UsersService {
     private final UsersRepo usersRepo;
     private final JavaMailSender javaMailSender;
+    private final UserProfileRepo userProfileRepo;
+    private final SkillsRepo skillsRepo;
+    private final PreferenceRepo preferenceRepo;
 
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
-
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
-
-
 
     public Users register(Users newUser) {
         String uuid= UUID.randomUUID().toString();
@@ -50,7 +58,7 @@ public class UsersService {
         String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+newUser.getUuid();
         String to= newUser.getEmail();
         String subject="eNaukri job portal - Verify your account";
-        String body="Click the link to verify your account" +link;
+        String body="Click the link to verify your account " +link;
         sendEmail(to,subject,body);
         return newUser;
     }
@@ -77,17 +85,17 @@ public class UsersService {
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         mapper.updateValue(existingUser,user);
-        existingUser.getUserProfile().setPpPath(FileUploadUtil.imageUpload(imgFile));
-        existingUser.getUserProfile().setCvPath(FileUploadUtil.resumeUpload(resumeFile));
+        getUserProfile(existingUser).setPpPath(FileUploadUtil.imageUpload(imgFile));
+        getUserProfile(existingUser).setCvPath(FileUploadUtil.resumeUpload(resumeFile));
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
-    public UserProfile createProfile(UserProfileDto dto, Principal principal)//, MultipartFile imgFile)
-            {
+    public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile)
+            throws IOException{
         Users user = usersRepo.findByEmail(principal.getName());
         UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
         userProfile.setUsers(user);
-//        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
+        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
         List<UserSkills> userSkillsList=new ArrayList<>();
         for (Long skillId : dto.getSkillsList()) {
             Skills skill = skillsRepo.findById(skillId).orElse(null);
@@ -102,16 +110,21 @@ public class UsersService {
         for(Experience ex:userProfile.getExperienceList()){
             ex.setExpUser(userProfile);
         }
-//        userProfile.getEduca;
         userProfile.setUserSkillsList(userSkillsList);
+        userProfile.setUsers(user);
         userProfileRepo.save(userProfile);
-        user.setUserProfile(userProfile);
-        return user.getUserProfile();
+        return userProfile;
     }
     public Preference createPreferences(Principal principal, Preference preference){
         Users user=usersRepo.findByEmail(principal.getName());
         Preference preference1=preferenceRepo.save(preference);
-        preference1.setUserPreferences(user.getUserProfile());
+        preference1.setUserPreferences(getUserProfile(user));
         return preference1;
+    }
+    public UserProfile getUserProfile(Users users) {
+        return userProfileRepo.findUserProfileByUsers(users);
+    }
+    public List<UserProfile> searchUser(String query) {
+        return userProfileRepo.findByQuery(query);
     }
 }

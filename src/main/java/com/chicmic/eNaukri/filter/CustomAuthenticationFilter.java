@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
@@ -74,10 +75,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 //        authorities.add(new Authority("USER"));
 
         Users loggedInUser=userService.getUserByEmail(authResult.getName());
-        String token = JWT.create()
-                .withSubject(((User) authResult.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(Algorithm.HMAC256(SECRET.getBytes()));
+        String token = JwtUtils.createJwtToken(((User) authResult.getPrincipal()).getUsername());
         UserToken userToken=UserToken.builder().userr(loggedInUser).token(token).build();
 
     // saving uuid & updating cookies

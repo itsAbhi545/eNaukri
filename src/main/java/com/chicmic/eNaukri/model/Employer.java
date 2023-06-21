@@ -24,8 +24,6 @@ Employer {
     @NotNull
     private String fullName;
     private String designation;
-    @NotNull
-    private String fullName;
 
     private String ppPath;
 

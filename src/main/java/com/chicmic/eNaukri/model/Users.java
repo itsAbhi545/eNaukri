@@ -29,7 +29,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-@TrimAll
+//@TrimAll
 public class Users {
 
     @Id
@@ -49,7 +49,7 @@ public class Users {
     private String password;
     @Column(columnDefinition = "boolean default false")
     private boolean isVerified;
-    @UuidGenerator
+
     private String uuid;
     @Pattern(regexp = RegEx.PHONENUMBER,message = "")
     private String phoneNumber;
