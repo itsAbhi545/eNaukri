@@ -86,6 +86,9 @@ public class CompanyService {
         }
         return null;
     }
+    public void deletedCompany(Long id) {
+        companyRepo.deleteById(id);
+    }
 
     public Set<Job> getJobsForCompany(Long id) {
         Company company = companyRepo.findById(id).get();
