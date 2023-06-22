@@ -75,21 +75,8 @@ public class CompanyController {
 
     @PostMapping("/signup")
     public ApiResponse signUp(@RequestBody CompanyDto companyDto){
-        Users users = Users.builder()
-                .email(companyDto.getEmail())
-                .password(companyDto.getPassword())
-                .phoneNumber(companyDto.getPhoneNumber()).build();
-        users = usersService.register(users);
-        companyDto.getCompany().setUsers(users);
-        Company company = companyService.save(companyDto.getCompany());
-        //Role
-        Roles roles = rolesService.getRoleByRoleName("Company");
-        UserRole userRole = UserRole.builder()
-                .userId(users)
-                .roleId(roles)
-                .build();
-        rolesService.saveUserRole(userRole);
-        return new ApiResponse("Company " + users.getEmail() + " Register Successfully", company, HttpStatus.CREATED);
+        Company company = companyService.companySignup(companyDto);
+        return new ApiResponse("Company " + company.getUsers().getEmail() + " Register Successfully", company, HttpStatus.CREATED);
     }
     //Search
     @GetMapping("/search")

@@ -13,7 +13,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+
 public class UserProfile {
     @Id
     @GeneratedValue(strategy =GenerationType.IDENTITY)
@@ -24,12 +28,15 @@ public class UserProfile {
     private String cvPath;
     private String bio;
     private String ppPath;
+
+
     private boolean hasPremium;
     @OneToOne(mappedBy = "userSubscription", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Premium premium;
     @OneToOne(mappedBy = "userPreferences", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     private Preference preference;
 
@@ -48,9 +55,7 @@ public class UserProfile {
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
-    @JsonIgnore
     private Users users;
-    @ManyToMany(cascade = CascadeType.REMOVE)
-    private List<Job> invitedJobs=new ArrayList<>();
+
 
 }
