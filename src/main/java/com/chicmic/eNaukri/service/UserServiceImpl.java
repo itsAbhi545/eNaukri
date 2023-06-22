@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -98,6 +99,9 @@ public class UserServiceImpl implements UserDetailsService {
         if(user.isVerified()==false ){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
         }
+//        if(!user.getEmployerProfile().getIsApproved()) {
+//            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
+//        }
         if(!employerService.findByUsers(user).getIsApproved()) {
             throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
         }
@@ -117,20 +121,20 @@ public class UserServiceImpl implements UserDetailsService {
        return experienceRepo.findByExpUserAndCurrentlyWorking(users,true).getExCompany().getName();
     }
 
-    public void changeAlerts(Long id, boolean b) {
-        Users temp=usersRepo.findById(id).get();
+    public void changeAlerts(Principal principal, boolean b) {
+        Users temp=usersRepo.findByEmail(principal.getName());
         temp.setEnableNotification(b);
         usersRepo.save(temp);
     }
 
-    public boolean checkJobForUser(Long id, Long jobId) {
-        Users temp=usersRepo.findById(id).get();
+    public boolean checkJobForUser(Principal principal, Long jobId) {
+        Users temp=usersRepo.findByEmail(principal.getName());
         Job job=jobRepo.findById(jobId).get();
         return applicationRepo.existsByApplicantIdAndJobId(temp,job);
     }
 
-    public void withdrawApxn(Long id, Long jobId) {
-        Users temp=usersRepo.findById(id).get();
+    public void withdrawApxn(Principal principal, Long jobId) {
+        Users temp=usersRepo.findByEmail(principal.getName());
         Job job=jobRepo.findById(jobId).get();
         Application application= applicationRepo.findByApplicantIdAndJobId(temp,job);
         application.setWithdraw(true);

@@ -49,6 +49,13 @@ public class Job {
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
     private List<JobSkills> jobSkillsList =new ArrayList<>();
+
+//    @ManyToOne(cascade = CascadeType.REMOVE)
+//    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+//    @JsonIgnore
+//    private List<JobSkills> jobSkillsList =new ArrayList<>();
+
+
     @ManyToOne
     private Employer employer;
     @ManyToMany(cascade = CascadeType.REMOVE)
