@@ -63,5 +63,11 @@ public class AdminController {
         companyService.disApproveCompany(companyService.findByID(id));
         return new ApiResponse("Company DisApproved Successfully",null, HttpStatus.OK);
     }
+    @DeleteMapping("/company/{id}")
+    public ApiResponse deleteCompany(@PathVariable Long id) {
+        companyService.deletedCompany(id);
+        return new ApiResponse("Company Deleted Successfully",null, HttpStatus.OK);
+    }
+
 
 }
