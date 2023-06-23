@@ -15,6 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,7 +56,6 @@ public class Users {
     private String phoneNumber;
     @Column(columnDefinition = "boolean default true")
     private boolean enableNotification;
-
     //mappings
 
     @OneToOne(mappedBy = "userLinks", cascade = CascadeType.ALL,fetch = FetchType.LAZY)

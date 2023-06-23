@@ -23,7 +23,7 @@ public class FileUploadUtil {
             byte[] resumeFileBytes = resumeFile.getBytes();
             Path resumePath = Paths.get(resumeFolder + resumeFile.getOriginalFilename());
             Files.write(resumePath, resumeFileBytes);
-            cvPath = "/static/assets/files" + resumeFile.getOriginalFilename();
+            cvPath = "/static/assets/files/" + resumeFile.getOriginalFilename();
         }
         return cvPath;
     }
@@ -35,7 +35,7 @@ public class FileUploadUtil {
             byte[] imgFileBytes = resumeFile.getBytes();
             Path imgPath = Paths.get(imgFolder + resumeFile.getOriginalFilename());
             Files.write(imgPath, imgFileBytes);
-            ppPath = "/static/assets/files" + resumeFile.getOriginalFilename();
+            ppPath = "/static/assets/files/" + resumeFile.getOriginalFilename();
         }
         return ppPath;
     }

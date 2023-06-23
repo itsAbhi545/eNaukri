@@ -2,10 +2,9 @@ package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
 import com.chicmic.eNaukri.model.ApplicationStatus;
-import com.chicmic.eNaukri.model.JobCategories;
+import com.chicmic.eNaukri.model.Categories;
 import com.chicmic.eNaukri.model.Roles;
 import com.chicmic.eNaukri.model.Skills;
-import com.chicmic.eNaukri.repo.EmployerRepo;
 import com.chicmic.eNaukri.service.AdministratorService;
 import com.chicmic.eNaukri.service.CompanyService;
 import com.chicmic.eNaukri.service.RolesService;
@@ -21,7 +20,7 @@ public class AdministratorController {
     private final RolesService rolesService;
     private final CompanyService companyService;
     @PostMapping("create-application-status")
-    public ApiResponse createApplicationStatus(ApplicationStatus applicationStatus){
+    public ApiResponse createApplicationStatus(@RequestBody ApplicationStatus applicationStatus){
          applicationStatus=administratorService.createApplicationStatus(applicationStatus);
         return new ApiResponse("Created new status",applicationStatus,HttpStatus.CREATED);
     }
@@ -31,9 +30,9 @@ public class AdministratorController {
         return new ApiResponse("Company approved",companyService.findCompanyById(id),HttpStatus.CREATED);
     }
     @PostMapping("create-job-categories")
-    public ApiResponse createCategories(JobCategories jobCategories){
-        jobCategories=administratorService.createJobCategories(jobCategories);
-        return new ApiResponse("created new category",jobCategories,HttpStatus.CREATED);
+    public ApiResponse createCategories(@RequestBody Categories categories){
+        categories =administratorService.createCategories(categories);
+        return new ApiResponse("created new category", categories,HttpStatus.CREATED);
     }
     @PostMapping("create-skills")
     public ApiResponse addNewSkills(Skills skills){

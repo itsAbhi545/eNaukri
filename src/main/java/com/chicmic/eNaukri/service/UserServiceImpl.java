@@ -102,9 +102,9 @@ public class UserServiceImpl implements UserDetailsService {
 //        if(!user.getEmployerProfile().getIsApproved()) {
 //            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
 //        }
-        if(!employerService.findByUsers(user).getIsApproved()) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
-        }
+//        if(!employerService.findByUsers(user).getIsApproved()) {
+//            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
+//        }
 
 
         UserRole userRole = rolesService.findUserRoleByUser(user);

@@ -12,6 +12,7 @@ import com.chicmic.eNaukri.repo.ApplicationRepo;
 import com.chicmic.eNaukri.repo.CompanyRepo;
 import com.chicmic.eNaukri.repo.JobRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,23 +51,19 @@ public class ApplicationService {
     private final ApplicationStatusRepo statusRepo;
     private final UsersService usersService;
     private final EmployerService employerService;
-    public void applyForJob(ApplicationDto application, Principal principal, Long jobId)
+    public void applyForJob(ApplicationDto application, Principal principal, Long jobId,MultipartFile resumeFile)
             throws IOException, MessagingException, ApiException {
-
         Users user = usersRepo.findByEmail(principal.getName());
         Job job = jobRepo.findJobByJobId(jobId);
-        MultipartFile resumeFile = application.getResumeFile();
-
         boolean hasExistingApplication = applicationRepo.existsByApplicantIdAndJobId(user, job);
         if (hasExistingApplication) {
             throw new ApiException(HttpStatus.valueOf(409),"User has already applied to this job.");
         }
         else {
             if (job.isActive() == true) {
-                Application jobApplication = new Application();
-                BeanUtils.copyProperties(application, jobApplication);
+                Application jobApplication = CustomObjectMapper.convertDtoToObject(application,Application.class);
                 jobApplication.setCvPath(fileUploadUtil.resumeUpload(resumeFile));
-//                jobApplication.setApplicantId(user);
+                jobApplication.setApplicantId(usersService.getUserProfile(user));
                 jobApplication.setJobId(job);
                 applicationRepo.save(jobApplication);
                 job.setNumApplicants(job.getNumApplicants() + 1);
@@ -125,7 +122,7 @@ public class ApplicationService {
             application.setApplicationStatus(status);
             String to=application.getEmail();
             String subject="Regarding status of your application for "+job.getJobTitle();
-            String body="Your application for "+job.getJobTitle()+",at "+job.getEmployer().getCompany().getName()+
+            String body="Your application for "+job.getJobTitle()+", at "+job.getEmployer().getCompany().getName()+
                     " has been "+status.getMessage();
             usersService.sendEmail(to,subject,body);
             return application;

@@ -5,20 +5,16 @@ import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
-
-import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Service@RequiredArgsConstructor
 public class AdministratorService {
     private final EmployerRepo employerRepo;
     private final UsersRepo usersRepo;
     private final ApplicationStatusRepo applicationStatusRepo;
-    private final JobCategoriesRepo jobCategoriesRepo;
+    private final CategoriesRepo categoriesRepo;
     private final SkillsRepo skillsRepo;
     private final RolesService rolesService;
     private final CompanyRepo companyRepo;
@@ -35,9 +31,9 @@ public class AdministratorService {
             company.setApproved(true);
         }
     }
-    public JobCategories createJobCategories(JobCategories dto){
-        JobCategories jobCategories=jobCategoriesRepo.save(dto);
-        return jobCategories;
+    public Categories createCategories(Categories dto){
+        Categories categories =categoriesRepo.save(dto);
+        return categories;
     }
     public Skills createSkills(Skills dto){
         dto.setSkillName(dto.getSkillName().toLowerCase());

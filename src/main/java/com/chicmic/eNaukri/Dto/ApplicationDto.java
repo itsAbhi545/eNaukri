@@ -11,5 +11,5 @@ public class ApplicationDto {
     private String fullName;
     private String email;
     private String phoneNumber;
-    private MultipartFile resumeFile;
+//    private MultipartFile resumeFile;
 }

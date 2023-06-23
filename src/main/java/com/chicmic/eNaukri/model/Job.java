@@ -1,10 +1,7 @@
 package com.chicmic.eNaukri.model;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -13,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -53,17 +49,10 @@ public class Job {
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
     private List<JobSkills> jobSkillsList =new ArrayList<>();
-
-//    @ManyToOne(cascade = CascadeType.REMOVE)
-//    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-//    @JsonIgnore
-//    private List<JobSkills> jobSkillsList =new ArrayList<>();
-
-
     @ManyToOne
     private Employer employer;
     @ManyToMany(cascade = CascadeType.REMOVE)
-    private List<JobCategories> jobCategories=new ArrayList<>();
+    private List<Categories> categories =new ArrayList<>();
     @ManyToMany(cascade = CascadeType.REMOVE)
     private List<UserProfile> invitedUsers=new ArrayList<>();
 }

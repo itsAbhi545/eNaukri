@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.service;
 
+import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -54,19 +56,29 @@ public class UsersService {
         newUser.setUuid(uuid);
         newUser.setPassword(passwordEncoder().encode(newUser.getPassword()));
         usersRepo.save(newUser);
-        String token = JwtUtils.createJwtToken(newUser.getUuid());
-        String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+newUser.getUuid();
-        String to= newUser.getEmail();
+        sendVerificationLink(newUser.getEmail());
+        return newUser;
+    }
+    public void sendVerificationLink(String email){
+        Users user = usersRepo.findByEmail(email);
+        if(user==null){
+            throw new ApiException(HttpStatus.NOT_FOUND,"No user by this email, consider signing up");
+        }
+        String token = JwtUtils.createJwtToken(user.getUuid());
+        String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+user.getUuid();
+        String to= user.getEmail();
         String subject="eNaukri job portal - Verify your account";
         String body="Click the link to verify your account " +link;
         sendEmail(to,subject,body);
-        return newUser;
     }
     public void verifyUserAccount(String token, String uuid){
         String decodedToken = JwtUtils.verifyJwtToken(token);
         Users user= usersRepo.findByUuid(uuid);
         if(decodedToken==uuid){
             user.setVerified(true);
+        }
+        else{
+            throw new ApiException(HttpStatus.FORBIDDEN,"The token has expired consider making a new request");
         }
     }
 
@@ -110,6 +122,7 @@ public class UsersService {
         for(Experience ex:userProfile.getExperienceList()){
             ex.setExpUser(userProfile);
         }
+        userProfile.getPreference().setUserPreferences(userProfile);
         userProfile.setUserSkillsList(userSkillsList);
         userProfile.setUsers(user);
         userProfileRepo.save(userProfile);
