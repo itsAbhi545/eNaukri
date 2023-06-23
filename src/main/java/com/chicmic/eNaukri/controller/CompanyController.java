@@ -26,6 +26,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CompanyController {
     private final UserServiceImpl userService;
+
     private final JobRepo jobRepo;
     private final CompanyRepo companyRepo;
     private final CompanyService companyService;
