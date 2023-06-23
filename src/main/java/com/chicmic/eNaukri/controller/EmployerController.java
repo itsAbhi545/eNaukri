@@ -33,6 +33,8 @@ public class EmployerController {
     private final EmployerService employerService;
     private final JobService jobService;
     private final RolesService rolesService;
+    private final ApplicationService applicationService;
+
 
     @PostMapping("/signup")
     public ApiResponse signup( String jsonString , @ModelAttribute MultipartFile userImg,

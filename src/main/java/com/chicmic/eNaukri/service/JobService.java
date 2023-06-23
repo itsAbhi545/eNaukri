@@ -36,7 +36,7 @@ public class JobService {
     private final UsersService usersService;
     @PersistenceContext
     private EntityManager entityManager;
-    UsersService usersService;
+
 
     public Job getJobById(Long jobId) {
         return jobRepo.findById(jobId).orElse(null);
