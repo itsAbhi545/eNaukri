@@ -25,6 +25,18 @@ public class EmployerSearchController {
         return new ApiResponse("Relevant User List Created Successfully", usersSet, HttpStatus.CREATED);
     }
 
+    @GetMapping("jobs")
+    public List<Job> displayJobs(@RequestParam(required = false,name = "q") String query,
+                                 @RequestParam(required = false,name = "location") String location,
+                                 @RequestParam(required = false,name = "type") String jobType,
+                                 @RequestParam(required = false,name = "postedOn") String postedOn,
+                                 @RequestParam(required = false,name = "remoteHybridOnsite") String remoteHybridOnsite,
+                                 @ModelAttribute(name = "skills") List<Long> skillIds,
+                                 @RequestParam(required = false,name = "yoe") Integer yoe,
+                                 @RequestParam(required = false,name = "salary") Integer salary
 
+    ){
+        return jobService.displayFilteredPaginatedJobs(query,location,jobType,postedOn,remoteHybridOnsite,yoe,salary,skillIds);
+    }
 
 }

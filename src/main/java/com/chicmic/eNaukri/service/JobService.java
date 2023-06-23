@@ -36,7 +36,7 @@ public class JobService {
     private final UsersService usersService;
     @PersistenceContext
     private EntityManager entityManager;
-
+    UsersService usersService;
 
     public Job getJobById(Long jobId) {
         return jobRepo.findById(jobId).orElse(null);
@@ -47,13 +47,7 @@ public class JobService {
         newJob.setActive(true);
         newJob.setEmployer(employer);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-        List<Categories> categoriesList =new ArrayList<>();
-        if(job.getJobCategories() != null){
-            for (Long jc : job.getJobCategories()) {
-                Categories categories = categoriesRepo.findById(jc).get();
-                categoriesList.add(categories);
-            }
-        }
+        List<Categories> categoriesList = categoriesRepo.findAllById(job.getJobCategories());
         job.getSkillsList().addAll(job.getOtherSkills());
         for (String jobSkillId : job.getSkillsList()) {
             String st = jobSkillId.replaceAll("[^A-Za-z]", "");
@@ -78,6 +72,7 @@ public class JobService {
         newJob.setCategories(categoriesList);
         newJob.setJobSkillsList(newJobSkillList);
         newJob = jobRepo.save(newJob);
+        for(Categories categories : categoriesList)categories.getJobList().add(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
       //  sendEmailNotifications(usersList,newJob);
         return newJob;
@@ -138,6 +133,7 @@ public class JobService {
             Expression<Long> skillIdExpression = skillJoin.get("skill").get("skillId");
             skillQuery = skillIdExpression.in(skillIds);
         }
+
 
         //building query
         criteriaQuery.where(builder.or(queryInTitle,queryInDesc),locationQuery,jobTypeQuery,postedOnQuery,workTypeQuery,activeJobs,yoeQuery,salaryQuery,skillQuery);

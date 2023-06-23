@@ -27,4 +27,13 @@ public class RolesService {
     public UserRole findUserRoleByUser(Users user) {
         return userRoleRepo.findByUserId(user);
     }
+
+    public UserRole addRoleToUser(String roleName, Users users) {
+        Roles roles = getRoleByRoleName(roleName);
+        UserRole userRole = UserRole.builder()
+                .userId(users)
+                .roleId(roles)
+                .build();
+        return saveUserRole(userRole);
+    }
 }
