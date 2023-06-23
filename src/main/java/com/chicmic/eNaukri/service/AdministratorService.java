@@ -53,7 +53,7 @@ public class AdministratorService {
             userRole.setDeleted(true);
         }
     }
-//    public Users editProfile(Principal principal,){
+    //    public Users editProfile(Principal principal,){
 //        Users admin = usersRepo.findByEmail(principal.getName());
 //        admin.setPassword(passwordEncoder().encode("Harman@1234"));
 //    }

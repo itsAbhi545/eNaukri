@@ -28,4 +28,5 @@ public class Skills {
     private List<JobSkills> jobSkillsList=new ArrayList<>();
     @ManyToOne
     Categories categories;
+
 }
