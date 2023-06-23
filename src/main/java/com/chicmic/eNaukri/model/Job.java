@@ -56,6 +56,7 @@ public class Job {
 //    private List<JobSkills> jobSkillsList =new ArrayList<>();
 
 
+
     @ManyToOne
     private Employer employer;
     @ManyToMany(cascade = CascadeType.REMOVE)

@@ -50,7 +50,7 @@ public class TrimValidator  extends StdConverter<String, String> implements Conv
             System.out.println("\u001B[31m" + "size = " + fields.length  + "\u001B[0m");
          }
 
-        long notNull = Stream.of(fields)
+        long NullOrEmpty = Stream.of(fields)
                 .map(field -> {
                     if(Arrays.binarySearch(excludeFields, field) < 0) {
 //                        System.out.println("\u001B[36m" + "field value = " + (field) + "\u001B[0m");
@@ -81,17 +81,17 @@ public class TrimValidator  extends StdConverter<String, String> implements Conv
                     }
                     return PARSER.parseExpression(field).getValue(value);} )
                 .filter((data)->{
-                    return Objects.nonNull(data) && !(data.equals(""));
+                    return Objects.isNull(data) || (data.equals(""));
                 })
                 .count();
 
 
         System.out.println("\u001B[35m" + messages + "\u001B[0m");
-
+        System.out.println("\u001B[34m" + "Null = " +NullOrEmpty + "\u001B[0m");
 
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(messages).addConstraintViolation();
-        return notNull == 0 || notNull == fields.length;
+        return NullOrEmpty <= 0;
     }
 
 
