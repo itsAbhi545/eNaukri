@@ -14,6 +14,4 @@ public class ApplicationStatus {
     private Long id;
     private String status;
     private String message;
-    @OneToOne
-    Application application;
 }

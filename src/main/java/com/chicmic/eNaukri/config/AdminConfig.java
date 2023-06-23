@@ -29,8 +29,8 @@ public class AdminConfig {
                     .uuid(uuid)
                     .isVerified(true)
                     .build();
-            Roles roles = rolesService.getRoleByRoleName("ADMIN");
             userService.saveUser(admin);
+            Roles roles = rolesService.getRoleByRoleName("ADMIN");
             UserRole userRole = UserRole.builder()
                     .userId(admin)
                     .roleId(roles)

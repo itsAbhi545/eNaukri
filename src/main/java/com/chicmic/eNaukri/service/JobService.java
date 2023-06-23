@@ -33,10 +33,10 @@ public class JobService {
     private final EmployerRepo employerRepo;
     private final EmployerService employerService;
     private final CategoriesRepo categoriesRepo;
-    private final UsersService usersService;
+
     @PersistenceContext
     private EntityManager entityManager;
-
+    UsersService usersService;
 
     public Job getJobById(Long jobId) {
         return jobRepo.findById(jobId).orElse(null);
@@ -47,7 +47,14 @@ public class JobService {
         newJob.setActive(true);
         newJob.setEmployer(employer);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-        List<Categories> categoriesList = categoriesRepo.findAllById(job.getJobCategories());
+        List<Categories> categoriesList =new ArrayList<>();
+        if(job.getJobCategories() != null){
+            for (Long jc : job.getJobCategories()) {
+                Categories categories = categoriesRepo.findById(jc).get();
+                categoriesList.add(categories);
+            }
+        }
+//        else {
         job.getSkillsList().addAll(job.getOtherSkills());
         for (String jobSkillId : job.getSkillsList()) {
             String st = jobSkillId.replaceAll("[^A-Za-z]", "");
@@ -72,7 +79,6 @@ public class JobService {
         newJob.setCategories(categoriesList);
         newJob.setJobSkillsList(newJobSkillList);
         newJob = jobRepo.save(newJob);
-        for(Categories categories : categoriesList)categories.getJobList().add(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
       //  sendEmailNotifications(usersList,newJob);
         return newJob;
@@ -111,22 +117,15 @@ public class JobService {
         }
         Predicate workTypeQuery=(!StringUtils.isEmpty(remoteHybridOnsite))?builder.equal(root.get("remoteHybridOnsite"),remoteHybridOnsite):builder.like(root.get("remoteHybridOnsite"),"%%");
         Predicate activeJobs=builder.isTrue(root.get("active"));
-        Predicate yoeQuery = (yoe != null) ? builder.greaterThanOrEqualTo(root.get("minYear"), yoe) : builder.conjunction();
+        Predicate yoeQuery = (yoe != null) ? builder.lessThanOrEqualTo(root.get("minYear"), yoe) : builder.conjunction();
 // Create predicate for salary filter
         Predicate salaryQuery = (salary != null) ? builder.and(
-                builder.lessThanOrEqualTo(root.get("minSalary"), salary),
-                builder.greaterThanOrEqualTo(root.get("maxSalary"), salary)
+                builder.greaterThanOrEqualTo(root.get("maxSalary"), salary),
+                builder.lessThanOrEqualTo(root.get("minSalary"), salary)
         ) : builder.conjunction();
         // Create predicate for skill IDs filter
-//        Join<Job, JobSkills> skillJoin = root.join("jobSkillsList", JoinType.INNER);
-//        List<JobSkills> jobSkillsList=new ArrayList<>();
-//        for(Long l:skillIds){
-//            Skills skill=skillsRepo.findById(l).get();
-//            List<JobSkills> jobSkills=jobSkillsRepo.findBySkill(skill);
-//
-//        }
-//        Predicate skillQuery = (!skillIds.isEmpty()) ? skillJoin.get("id").in(skillIds) : builder.conjunction();
-        // Update the predicate for skill IDs filter
+        //        Join<Job, Skills> skillJoin = root.join("skills", JoinType.INNER);
+        //        Predicate skillQuery = (!skillIds.isEmpty()) ? skillJoin.get("id").in(skillIds) : builder.conjunction();
         Predicate skillQuery = builder.conjunction();
         if (!skillIds.isEmpty()) {
             Join<Job, JobSkills> skillJoin = root.join("jobSkillsList", JoinType.INNER);
@@ -197,21 +196,6 @@ public class JobService {
                 usersService.sendEmail(to, subject, body);
             }
         }
-    }
-    public List<Job> getPreferredJobs(Principal principal){
-        Users u =usersService.getUserByEmail(principal.getName());
-        System.out.println(u);
-        Preference p =usersService.getUserProfile(u).getPreference();
-        String location=p.getLocation();
-        String remoteHybridOnsite=p.getRemoteHybridOnsite();
-        Integer yoe=p.getYoe();
-        Integer salary=p.getSalary();
-        List<UserSkills> userSkillsList=usersService.getUserProfile(u).getUserSkillsList();
-        List<Long> skillIds=new ArrayList<>();
-        for (UserSkills us:userSkillsList){
-            skillIds.add(us.getSkills().getSkillId());
-        }
-        return displayFilteredPaginatedJobs("",location,"","",remoteHybridOnsite,yoe,salary,skillIds);
     }
     public List<Application> getListOfApplicants(Long jobId){
         Job job=jobRepo.findById(jobId).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"Job doesn't exist"));
