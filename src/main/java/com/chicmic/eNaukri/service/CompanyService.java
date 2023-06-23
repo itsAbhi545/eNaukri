@@ -39,27 +39,35 @@ public class CompanyService {
                 .phoneNumber(companyDto.getPhoneNumber()).build();
         users = usersService.register(users);
         companyDto.getCompany().setUsers(users);
-       // Company company = save(companyDto.getCompany());
-//        List<Categories> categoriesList=categoriesRepo.findAllById(companyDto.getCategories());
-//        List<CompanyCategories> companyCategoriesList = new ArrayList<>();
-//        for(Categories category : categoriesList){
-//            companyCategoriesList.add(new CompanyCategories(null, company, category));
-//        }
-//        companyCategoriesRepo.saveAll(companyCategoriesList);
-//        //Role
-//        Roles roles = rolesService.getRoleByRoleName("Company");
-//        UserRole userRole = UserRole.builder()
-//                .userId(users)
-//                .roleId(roles)
-//                .build();
-//        rolesService.saveUserRole(userRole);
+        Company company = save(companyDto.getCompany());
+        List<Categories> categoriesList=categoriesRepo.findAllById(companyDto.getCategories());
+        List<CompanyCategories> companyCategoriesList = new ArrayList<>();
+        for(Categories category : categoriesList){
+            companyCategoriesList.add(new CompanyCategories(null, company, category));
+        }
+        companyCategoriesRepo.saveAll(companyCategoriesList);
+        //Role
+        rolesService.addRoleToUser("COMPANY", users);
         return null;
+    }
+    public Company updateCompany(Company companyReq, Principal principal){
+        Users user = usersService.getUserByEmail(principal.getName());
+        Company company = findCompanyByUser(user);
+        company.setName(company.getName());
+        company.setAddress(companyReq.getAddress());
+        company.setFoundedIn(companyReq.getFoundedIn());
+        company.setWebsite(companyReq.getWebsite());
+        company.setAbout(companyReq.getAbout());
+        return company;
     }
     public Company findByID(Long id) {
         return companyRepo.findById(id).get();
     }
     public Company findByUUID(String uuid) {
         return companyRepo.findByUuid(uuid);
+    }
+    public Company findCompanyByUser(Users users) {
+        return companyRepo.findByUsers(users);
     }
     public void approveCompany(Company company) {
         company.setApproved(true);
@@ -129,7 +137,8 @@ public class CompanyService {
         return null;
     }
 
-    public List<Company> searchCompany(String query) {
-        return companyRepo.findCompanyByQuery(query);
+    public List<Company> searchCompany(String query, String location, List<Long> categoryIds){
+        return companyCategoriesRepo.searchCompanyAndCategory(companyRepo.findCompanyByQuery(query, location), categoryIds);
+
     }
 }

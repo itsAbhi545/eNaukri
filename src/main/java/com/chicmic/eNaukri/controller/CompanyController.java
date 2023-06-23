@@ -19,6 +19,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/company/")
@@ -44,7 +45,7 @@ public class CompanyController {
     public ResponseEntity<?> getjobFromCompany(@PathVariable("id")Long id, @PathVariable("jobId") Long jobId){
             return ResponseEntity.ok(companyService.jobExistsForCompany(id, jobId));
     }
-    @PostMapping("post-job")
+    @PostMapping("postJob")
     public ApiResponse postJob(@RequestBody JobDto jobDto, Principal principal){
 
         Employer employer = employerService.findByUsers(userService.getUserByEmail(principal.getName()));
@@ -78,10 +79,26 @@ public class CompanyController {
         Company company = companyService.companySignup(companyDto);
         return new ApiResponse("Company " + company.getUsers().getEmail() + " Register Successfully", company, HttpStatus.CREATED);
     }
+    @PostMapping("/update")
+    public ApiResponse companyUpdate(@RequestBody Company companyReq, Principal principal){
+        Company company = companyService.updateCompany(companyReq, principal);
+
+        return new ApiResponse("Company " + company.getUsers().getEmail() + " Register Successfully", company, HttpStatus.CREATED);
+    }
+
     //Search
+    //filter
     @GetMapping("/search")
-    public ApiResponse search(@RequestParam("query") String query) {
-        List<Company> companyList = companyService.searchCompany(query);
+    public ApiResponse search(@RequestParam("query") String query,
+                              @RequestParam(required = false,name = "location", defaultValue = "") String location,
+                              @RequestBody List<Long> categoryIds,
+                              Principal principal
+    ) {
+        if(location.equals("") && principal != null){
+            Users user = userService.getUserByEmail(principal.getName());
+            location = usersService.getUserProfile(user).getPreference().getLocation();
+        }
+        List<Company> companyList = companyService.searchCompany(query, location, categoryIds);
         return new ApiResponse("Search Result Successfully Generated for the query", companyList, HttpStatus.OK);
     }
 

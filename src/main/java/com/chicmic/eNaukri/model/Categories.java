@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.model;
 
 import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,5 +21,6 @@ public class Categories {
     @OneToMany(mappedBy = "categories",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     List<Skills> categorySkills=new ArrayList<>();
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonIgnore
     List<Job> jobList=new ArrayList<>();
 }

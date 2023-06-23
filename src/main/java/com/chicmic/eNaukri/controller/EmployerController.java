@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/employer")
@@ -34,14 +35,21 @@ public class EmployerController {
         ObjectMapper mapper = new ObjectMapper();
         UsersDto usersDto = mapper.readValue(jsonString, UsersDto.class);
         Employer employer = employerService.saveEmployer(usersDto, userImg, companyImg);
-        Roles roles = rolesService.getRoleByRoleName("EMPLOYER");
-        UserRole userRole = UserRole.builder()
-                .userId(employer.getUsers())
-                .roleId(roles)
-                .build();
-        rolesService.saveUserRole(userRole);
+        rolesService.addRoleToUser("EMPLOYER", employer.getUsers());
+
         return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );
     }
+    @PostMapping("/update")
+    public ApiResponse update(String jsonString , @ModelAttribute MultipartFile userImg,
+                              @ModelAttribute MultipartFile companyImg, Principal principal) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        UsersDto usersDto = mapper.readValue(jsonString, UsersDto.class);
+        Employer employer = employerService.updateEmployer(principal,usersDto, userImg, companyImg);
+        rolesService.addRoleToUser("EMPLOYER", employer.getUsers());
+
+        return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );
+    }
+
     @PostMapping("/addRole")
     public String addRole(@RequestParam String roleName){
         Roles roles = rolesService.getRoleByRoleName(roleName);

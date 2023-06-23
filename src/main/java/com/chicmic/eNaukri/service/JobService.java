@@ -47,14 +47,7 @@ public class JobService {
         newJob.setActive(true);
         newJob.setEmployer(employer);
         List<JobSkills> newJobSkillList = new ArrayList<>();
-        List<Categories> categoriesList =new ArrayList<>();
-        if(job.getJobCategories() != null){
-            for (Long jc : job.getJobCategories()) {
-                Categories categories = categoriesRepo.findById(jc).get();
-                categoriesList.add(categories);
-            }
-        }
-//        else {
+        List<Categories> categoriesList = categoriesRepo.findAllById(job.getJobCategories());
         job.getSkillsList().addAll(job.getOtherSkills());
         for (String jobSkillId : job.getSkillsList()) {
             String st = jobSkillId.replaceAll("[^A-Za-z]", "");
@@ -79,6 +72,7 @@ public class JobService {
         newJob.setCategories(categoriesList);
         newJob.setJobSkillsList(newJobSkillList);
         newJob = jobRepo.save(newJob);
+        for(Categories categories : categoriesList)categories.getJobList().add(newJob);
         List<Users> usersList=getUsersWithMatchingSkills(newJob.getJobId());
       //  sendEmailNotifications(usersList,newJob);
         return newJob;

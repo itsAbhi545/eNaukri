@@ -53,6 +53,28 @@ public class EmployerService {
         usersService.register(users);
         return employerRepo.save(employer);
     }
+    public Employer updateEmployer(Principal principal,UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
+        Employer employer = findByUsers(usersService.getUserByEmail(principal.getName()));
+        if(employer == null || !employer.equals(usersDto.getEmployerProfile())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Employer does not exist");
+        }
+        Company company = companyService.findByID(usersDto.getCompanyId());
+        if(!company.equals(employer.getCompany())){
+            employer.setIsApproved(false);
+            Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
+            employerSet.add(employer);
+            company.setEmployerSet(employerSet);
+            employer.setCompany(company);
+            company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+        }
+        employer.setPpPath(FileUploadUtil.imageUpload(userImg));
+        Users users = new Users();
+        BeanUtils.copyProperties(usersDto, users);
+        employer.setUsers(users);
+        usersService.register(users);
+        return employerRepo.save(employer);
+    }
+
 
     //Search
 
