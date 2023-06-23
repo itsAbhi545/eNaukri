@@ -134,6 +134,12 @@ public class UsersService {
         preference1.setUserPreferences(getUserProfile(user));
         return preference1;
     }
+    public Preference updatePreferences(Principal principal, Preference preference){
+        Users user=usersRepo.findByEmail(principal.getName());
+        Preference oldPreferences=getUserProfile(user).getPreference();
+        oldPreferences=preference;
+        return oldPreferences;
+    }
     public UserProfile getUserProfile(Users users) {
         return userProfileRepo.findUserProfileByUsers(users);
     }
