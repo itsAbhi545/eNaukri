@@ -1,20 +1,12 @@
 package com.chicmic.eNaukri.service;
 
-import com.chicmic.eNaukri.model.Education;
-import com.chicmic.eNaukri.model.Experience;
-import com.chicmic.eNaukri.model.UserSkills;
 import com.chicmic.eNaukri.model.Users;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.DocumentException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
-import scala.xml.Elem;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
-
-import static com.itextpdf.text.pdf.PdfName.T;
 //import static sun.security.ssl.SSLLogger.SSLSimpleFormatter.formatObject;
 
 //import static com.itextpdf.text.pdf.PdfName.T;

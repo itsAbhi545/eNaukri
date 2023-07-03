@@ -5,10 +5,7 @@ import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.*;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.mail.MessagingException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +21,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -39,7 +34,6 @@ public class UserController {
     private final UserServiceImpl userService;
     private final UsersService usersService;
     private final SocialLinkService linkService;
-    private final JobService jobService;
 
     @GetMapping("{id}")
     public void getUser(){
@@ -86,8 +80,8 @@ public class UserController {
     }
     @PostMapping("apply/{jobId}")
     public ResponseEntity<String> apply(Principal principal, @PathVariable("jobId") Long jobId,
-             @ModelAttribute ApplicationDto application,@RequestBody MultipartFile resumeFile) throws MessagingException, IOException {
-        applicationService.applyForJob(application,principal,jobId,resumeFile);
+                                        ApplicationDto application) throws MessagingException, IOException {
+        applicationService.applyForJob(application,principal,jobId);
         return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("unsubscribe/{id}")
@@ -117,11 +111,11 @@ public class UserController {
     public String numApplicants(@PathVariable Long jobId){
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
-    @PostMapping("add-socialLinks/{userid}")
-    public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
-        linkService.addSocialLinks(userId, dto,null);
-        return ResponseEntity.ok("Added social links");
-    }
+//    @PostMapping("add-socialLinks/{userid}")
+//    public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
+//        linkService.addSocialLinks(userId, dto,null);
+//        return ResponseEntity.ok("Added social links");
+//    }
 
     @DeleteMapping("delete-experience")
     public  ApiResponse delexp(Long expId){
@@ -134,16 +128,9 @@ public class UserController {
         return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
     @PostMapping("/create-profile")
-    public ApiResponse makeProfile(Principal principal, @ModelAttribute(name = "json") String json,@RequestBody MultipartFile imgFile) throws IOException {
-        ObjectMapper mapper=new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        UserProfileDto dto= mapper.readValue(json, UserProfileDto.class);
-        UserProfile up=usersService.createProfile(dto, principal,imgFile);
+    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile,SocialLinkDto socialLinkDto) throws IOException {
+        UserProfile up=usersService.createProfile(dto, principal,imgFile,socialLinkDto);
         return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
-    }
-    @GetMapping("/search-by-preferences")
-    public List<Job> getPreferredJobs(Principal principal){
-        return jobService.getPreferredJobs(principal);
     }
 
 }

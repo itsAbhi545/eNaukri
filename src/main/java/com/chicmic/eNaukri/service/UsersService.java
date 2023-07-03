@@ -49,7 +49,9 @@ public class UsersService {
         return usersRepo.findByEmail(email);
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
+
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
+
 
     public Users register(Users newUser) {
         String uuid= UUID.randomUUID().toString();
@@ -88,7 +90,7 @@ public class UsersService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        javaMailSender.send(message);
+//        javaMailSender.send(message);
     }
 
     public void updateUser(@Valid UsersDto user, @RequestParam MultipartFile imgFile,
@@ -102,6 +104,41 @@ public class UsersService {
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
+    public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile, SocialLinkDto socialLinkDto)
+            throws IOException{
+        Users user = usersRepo.findByEmail(principal.getName());
+        UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
+        userProfile.setUsers(user);
+        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
+        List<UserSkills> userSkillsList=new ArrayList<>();
+        for (Long skillId : dto.getSkillsList()) {
+            Skills skill = skillsRepo.findById(skillId).orElse(null);
+            UserSkills userSkills = UserSkills.builder().skills(skill).userProfile(userProfile).build();
+            if (skill != null) {
+                userSkillsList.add(userSkills);
+            }
+        }
+        for(Education ed:userProfile.getEducationList()){
+            ed.setEdUser(userProfile);
+        }
+        for(Experience ex:userProfile.getExperienceList()){
+            ex.setExpUser(userProfile);
+        }
+        SocialLink socialLink=CustomObjectMapper.convertDtoToObject(dto, SocialLink.class);
+        socialLink.setUser(user);
+        user.setSocialLink(socialLink);
+        usersRepo.save(user);
+        socialLinkRepo.save(socialLink);
+        userProfile.setUserSkillsList(userSkillsList);
+        userProfile.setUsers(user);
+        userProfileRepo.save(userProfile);
+        return userProfile;
+    }
+    public Preference createPreferences(Principal principal, Preference preference){
+        Users user=usersRepo.findByEmail(principal.getName());
+        Preference preference1=preferenceRepo.save(preference);
+        preference1.setUserPreferences(getUserProfile(user));
+        return preference1;
     public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile)
             throws IOException{
         Users user = usersRepo.findByEmail(principal.getName());

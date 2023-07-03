@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.model;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,11 @@ public class Job {
     @OneToMany(mappedBy = "jobId", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Application> applicationList =new ArrayList<>();
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<JobSkills> jobSkillsList =new ArrayList<>();
+
+
     @ManyToOne
     private Employer employer;
     @ManyToMany(cascade = CascadeType.REMOVE)

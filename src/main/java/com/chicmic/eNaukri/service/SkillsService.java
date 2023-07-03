@@ -9,7 +9,6 @@ import com.chicmic.eNaukri.repo.SkillsRepo;
 import com.chicmic.eNaukri.repo.UserSkillsRepo;
 import com.chicmic.eNaukri.repo.UsersRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

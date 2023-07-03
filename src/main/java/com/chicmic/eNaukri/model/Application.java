@@ -26,6 +26,7 @@ public class Application {
     private String fullName;
     private String email;
     private String phoneNumber;
+
     @ManyToOne
     @JsonIgnore
     private UserProfile applicantId;

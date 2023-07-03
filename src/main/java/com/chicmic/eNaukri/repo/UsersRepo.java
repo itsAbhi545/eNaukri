@@ -1,14 +1,7 @@
 package com.chicmic.eNaukri.repo;
 
-import com.chicmic.eNaukri.model.UserProfile;
 import com.chicmic.eNaukri.model.Users;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface UsersRepo extends JpaRepository< Users,Long> {
     public Users findByEmail(String email);
