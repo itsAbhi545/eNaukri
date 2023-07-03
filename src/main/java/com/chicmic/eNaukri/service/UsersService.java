@@ -1,13 +1,11 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.chicmic.eNaukri.Dto.SocialLinkDto;
 import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.PreferenceRepo;
-import com.chicmic.eNaukri.repo.SkillsRepo;
-import com.chicmic.eNaukri.repo.UserProfileRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.chicmic.eNaukri.util.JwtUtils;
@@ -15,7 +13,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,7 +29,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
@@ -43,6 +42,9 @@ public class UsersService {
     private final UserProfileRepo userProfileRepo;
     private final SkillsRepo skillsRepo;
     private final PreferenceRepo preferenceRepo;
+    private final SocialLinkRepo socialLinkRepo;
+    @Value("${serverAddress}")
+    public static   String serverAdd;
 
 
     public Users getUserByEmail(String email) {
@@ -65,20 +67,17 @@ public class UsersService {
             throw new ApiException(HttpStatus.NOT_FOUND,"No user by this email, consider signing up");
         }
         String token = JwtUtils.createJwtToken(user.getUuid());
-        String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+user.getUuid();
+        String link = serverAdd + "/eNaukri/verify/"+token+"/"+user.getUuid();
         String to= user.getEmail();
         String subject="eNaukri job portal - Verify your account";
         String body="Click the link to verify your account " +link;
-        sendEmail(to,subject,body);
+//        sendEmail(to,subject,body);
     }
     public void verifyUserAccount(String token, String uuid){
         String decodedToken = JwtUtils.verifyJwtToken(token);
         Users user= usersRepo.findByUuid(uuid);
-        if(decodedToken==uuid){
+        if(decodedToken.equals(uuid)){
             user.setVerified(true);
-        }
-        else{
-            throw new ApiException(HttpStatus.FORBIDDEN,"The token has expired consider making a new request");
         }
     }
 
@@ -88,7 +87,7 @@ public class UsersService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        javaMailSender.send(message);
+//        javaMailSender.send(message);
     }
 
     public void updateUser(@Valid UsersDto user, @RequestParam MultipartFile imgFile,
@@ -102,7 +101,7 @@ public class UsersService {
         existingUser.setUpdatedAt(LocalDateTime.now());
         usersRepo.save(existingUser);
     }
-    public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile)
+    public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile, SocialLinkDto socialLinkDto)
             throws IOException{
         Users user = usersRepo.findByEmail(principal.getName());
         UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
@@ -122,7 +121,11 @@ public class UsersService {
         for(Experience ex:userProfile.getExperienceList()){
             ex.setExpUser(userProfile);
         }
-        userProfile.getPreference().setUserPreferences(userProfile);
+        SocialLink socialLink=CustomObjectMapper.convertDtoToObject(dto, SocialLink.class);
+        socialLink.setUser(user);
+        user.setSocialLink(socialLink);
+        usersRepo.save(user);
+        socialLinkRepo.save(socialLink);
         userProfile.setUserSkillsList(userSkillsList);
         userProfile.setUsers(user);
         userProfileRepo.save(userProfile);
@@ -133,12 +136,6 @@ public class UsersService {
         Preference preference1=preferenceRepo.save(preference);
         preference1.setUserPreferences(getUserProfile(user));
         return preference1;
-    }
-    public Preference updatePreferences(Principal principal, Preference preference){
-        Users user=usersRepo.findByEmail(principal.getName());
-        Preference oldPreferences=getUserProfile(user).getPreference();
-        oldPreferences=preference;
-        return oldPreferences;
     }
     public UserProfile getUserProfile(Users users) {
         return userProfileRepo.findUserProfileByUsers(users);

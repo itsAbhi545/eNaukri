@@ -5,13 +5,9 @@ import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
-
-import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 
 @Service@RequiredArgsConstructor
 public class AdministratorService {

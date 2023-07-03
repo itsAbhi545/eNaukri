@@ -1,7 +1,6 @@
 package com.chicmic.eNaukri.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,8 +17,9 @@ public class PasswordResetToken {
     private Long id;
 
     private String token;
+    private String otp;
 
-    @OneToOne(targetEntity = Users.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "id")
+    @OneToOne
+    @JoinColumn(nullable = false, name = "user_id")
     private Users user;
 }

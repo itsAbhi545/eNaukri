@@ -1,14 +1,9 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
-import com.chicmic.eNaukri.Dto.EmployerDto;
-import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.*;
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.EmployerRepo;
-import com.chicmic.eNaukri.repo.PreferenceRepo;
+import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,12 +30,12 @@ public class EmployerService {
     private final ApplicationRepo applicationRepo;
 
 
-    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
+    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg) throws IOException {
         Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
         Company company = companyService.findByID(usersDto.getCompanyId());
         employer.setPpPath(FileUploadUtil.imageUpload(userImg));
-        company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+//        company.setPpPath(FileUploadUtil.imageUpload(companyImg));
 
         Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
         employerSet.add(employer);

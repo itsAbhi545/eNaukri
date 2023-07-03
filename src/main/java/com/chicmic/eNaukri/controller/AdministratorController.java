@@ -8,6 +8,7 @@ import com.chicmic.eNaukri.model.Skills;
 import com.chicmic.eNaukri.service.AdministratorService;
 import com.chicmic.eNaukri.service.CompanyService;
 import com.chicmic.eNaukri.service.RolesService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class AdministratorController {
         return new ApiResponse("Company approved",companyService.findCompanyById(id),HttpStatus.CREATED);
     }
     @PostMapping("create-job-categories")
-    public ApiResponse createCategories(@RequestBody Categories categories){
+    public ApiResponse createCategories(@RequestBody @Valid Categories categories){
         categories =administratorService.createCategories(categories);
         return new ApiResponse("created new category", categories,HttpStatus.CREATED);
     }

@@ -3,15 +3,11 @@ package com.chicmic.eNaukri.service;
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UserEducationDto;
 import com.chicmic.eNaukri.model.Education;
-
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.repo.EducationRepo;
-
 import com.chicmic.eNaukri.repo.UsersRepo;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -42,7 +38,7 @@ import java.util.Optional;
 
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         Education education = mapper.convertValue(dto, Education.class);
-        education.setEdId(Optional.of( educationRepo.findByDegree(dto.getDegree())).orElse(null).getEdId());
+        education.setExId(Optional.of( educationRepo.findByDegree(dto.getDegree())).orElse(null).getExId());
         if(education.getEndOn().isBefore(LocalDate.now())){
             education.setStudent(false);
         }

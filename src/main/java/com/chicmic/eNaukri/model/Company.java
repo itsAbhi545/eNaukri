@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,18 +22,29 @@ Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
+
     private String name;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate foundedIn;
+
     private String about;
+
     private String ppPath;
+
     private String zipCode;
+
     private String address;
+
     private String gstId;
+
     private String iso;
+
     private String website;
     @Column(columnDefinition = "BIT DEFAULT 0")
     private boolean approved;
     private String uuid;
+    private String size;
+    private Double completionStatus;
 
 //    @OneToMany(mappedBy = "postFor", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
 //    private Set<Job> jobList=new HashSet<>();

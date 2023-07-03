@@ -1,41 +1,27 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
-import com.chicmic.eNaukri.Dto.UsersDto;
-import com.chicmic.eNaukri.controller.UserController;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.util.*;
-
-import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Service
 @Slf4j
@@ -52,6 +38,7 @@ public class UserServiceImpl implements UserDetailsService {
     private final UserTokenRepo tokenRepo;
     private final RolesService rolesService;
     private final EmployerService employerService;
+    private final CompanyService companyService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -64,6 +51,9 @@ public class UserServiceImpl implements UserDetailsService {
 
     public Users getUserByEmail(String username) {
         return usersRepo.findByEmail(username);
+    }
+    public String getModelByEmail(String username) {
+        return usersRepo.findByEmail(username).toString();
     }
     public void saveUser(Users user) {
         usersRepo.save(user);
@@ -97,16 +87,17 @@ public class UserServiceImpl implements UserDetailsService {
             throw new ApiException(HttpStatus.NOT_FOUND,"User does not exist");
         }
         if(user.isVerified()==false ){
-            throw new ApiException(HttpStatus.UNAUTHORIZED,"User is not verified");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"User is not verified");
         }
 //        if(!user.getEmployerProfile().getIsApproved()) {
 //            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
 //        }
-        if(!employerService.findByUsers(user).getIsApproved()) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED,"Employer is not approved");
+        if(employerService.findByUsers(user)!=null&&!employerService.findByUsers(user).getIsApproved()) {
+            throw new ApiException(HttpStatus.FORBIDDEN,"Employer is not approved");
         }
-
-
+        if(companyService.findCompanyByUser(user)!=null&&!companyService.findCompanyByUser(user).isApproved()){
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"Company needs to be approved by the admin before login");
+        }
         UserRole userRole = rolesService.findUserRoleByUser(user);
         if(userRole.isDeleted()){
             throw new ApiException(HttpStatus.UNAUTHORIZED,"User is Deleted");
@@ -114,6 +105,10 @@ public class UserServiceImpl implements UserDetailsService {
         Collection<Authority> authorities=new ArrayList<>();
         authorities.add(new Authority("ROLE_" + userRole.getRoleId().getRoleName()));
         return new User(user.getEmail(),user.getPassword(),authorities);
+    }
+    public Users loginResponse(Principal principal){
+        Users  user= getUserByEmail(principal.getName());
+        return user;
     }
 
     public String findCurrentCompany(Long id) {
