@@ -27,9 +27,9 @@ public class PasswordResetService {
     private final JavaMailSender javaMailSender;
     private final PasswordResetTokenRepo resetTokenRepo;
     private final UsersRepo usersRepo;
-    public PasswordResetToken findByToken(String token){
-        return resetTokenRepo.findByToken(token);
-    }
+//    public PasswordResetToken findByToken(String token){
+//        return resetTokenRepo.findByToken(token);
+//    }
     public void delete(PasswordResetToken passwordResetToken){
         resetTokenRepo.delete(passwordResetToken);
     }
@@ -61,8 +61,8 @@ public class PasswordResetService {
         javaMailSender.send(message);
         System.out.println("email sent");
     }
-    public Users resetPassword(String token,String newPassword){
-        PasswordResetToken tokenObject=resetTokenRepo.findByToken(token);
+    public String verifyOtp(String otp,String newPassword){
+        PasswordResetToken tokenObject=resetTokenRepo.findByOtp(otp);
         Users user=tokenObject.getUser();
         if(user==null){
             throw new ApiException(HttpStatus.NOT_FOUND,"Invalid otp or user");
@@ -70,8 +70,20 @@ public class PasswordResetService {
         if(LocalDateTime.now().isAfter(tokenObject.getExpiryDate())){
             throw new ApiException(HttpStatus.FORBIDDEN,"The Reset token has expired make a new request");
         }
-        user.setPassword(passwordEncoder().encode(newPassword));
-        resetTokenRepo.delete(tokenObject);
+        tokenObject.setToken(UUID.randomUUID().toString());
+        return tokenObject.getToken();
+    }
+    public Users resetPassword(String token, String newPassword, String confirmPassword){
+        PasswordResetToken tokenObject= resetTokenRepo.findByToken(token);
+        Users user=tokenObject.getUser();
+        if(user==null){
+            throw new ApiException(HttpStatus.NOT_FOUND,"Invalid otp or user");
+        }
+        if(!newPassword.equals(confirmPassword)){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"Password fields do not match");
+        } else if (newPassword.equals(confirmPassword)) {
+            user.setPassword(passwordEncoder().encode(newPassword));
+        }
         return user;
     }
 }

@@ -5,6 +5,7 @@ import com.chicmic.eNaukri.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PasswordResetTokenRepo extends JpaRepository<PasswordResetToken,String> {
+     PasswordResetToken findByOtp(String otp);
      PasswordResetToken findByToken(String token);
 
 }
