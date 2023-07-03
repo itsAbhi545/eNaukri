@@ -99,7 +99,7 @@ public class CompanyService {
         return company;
     }
     public Company findByID(Long id) {
-        return companyRepo.findById(id).get();
+        return companyRepo.findById(id).orElse(null);
     }
     public Company findByUUID(String uuid) {
         return companyRepo.findByUuid(uuid);
@@ -205,14 +205,23 @@ public class CompanyService {
         System.out.println(count1+"???????????????????????????????");
         double completePercentage=((count1+(count2/3))/4)*20;
         System.out.println(completePercentage);
-        company.setCompletionStatus(company.getCompletionStatus()+completePercentage);
+        company.setCompletionStatus(80+completePercentage);
         company.setFoundedIn(LocalDate.parse(date));
         company.setSize(employeeRange.getRange(key.trim()));
         company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+        SocialLink sl= socialLinkRepo.findByUser(user);
+        if(sl==null){
         SocialLink socialLink = CustomObjectMapper.convertDtoToObject(dto, SocialLink.class);
         socialLink.setUser(user);
         user.setSocialLink(socialLink);
-        socialLinkRepo.save(socialLink);
+        socialLinkRepo.save(socialLink);}
+        else{
+            sl.setTwitter(dto.getTwitter());
+            sl.setLinkedIn(dto.getLinkedIn());
+            sl.setFacebook(dto.getFacebook());
+            sl.setOthers(dto.getOthers());
+            socialLinkRepo.save(sl);
+        }
         usersRepo.save(user);
         companyRepo.save(company);
         return company;

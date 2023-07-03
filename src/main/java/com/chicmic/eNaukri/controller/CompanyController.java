@@ -11,6 +11,7 @@ import com.chicmic.eNaukri.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
@@ -39,8 +40,6 @@ public class CompanyController {
     private final RolesService rolesService;
     private final SocialLinkService linkService;
     private final UsersService usersService;
-
-
 
     @GetMapping("{id}")
     public Company companyPage(@PathVariable Long id){
@@ -110,6 +109,7 @@ public class CompanyController {
     @PostMapping("create-profile")
     public ApiResponse createCompanyProfile(Principal principal, SocialLinkDto dto, String key, @RequestParam(required = true) MultipartFile companyImg, String foundedIn) throws IOException {
         Company company=companyService.createCompanyProfile(principal, key,companyImg,dto,foundedIn);
+
         return new ApiResponse("Created profile",company, HttpStatus.OK);
     }
     @PostMapping("update-profile")

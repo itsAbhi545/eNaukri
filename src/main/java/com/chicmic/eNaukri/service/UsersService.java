@@ -44,7 +44,7 @@ public class UsersService {
     private final PreferenceRepo preferenceRepo;
     private final SocialLinkRepo socialLinkRepo;
     @Value("${serverAddress}")
-    public static   String serverAdd;
+    public    String serverAdd;
 
 
     public Users getUserByEmail(String email) {
