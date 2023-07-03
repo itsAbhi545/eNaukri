@@ -18,5 +18,6 @@ public class CompanyDto {
     private String phoneNumber;
     private Company company;
     private List<Long> categories;
+//    private String completionStatus;
 
 }

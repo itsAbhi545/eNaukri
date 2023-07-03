@@ -26,12 +26,7 @@ public class EmployerDto {
     @Pattern(regexp = RegEx.PHONENUMBER,message = "Please enter a valid number")
     @NotNull
     private String phoneNumber;
-    private String zipCode;
-    private String address;
-    private String gstId;
-    private String iso;
-    private String website;
-    private String company;
-    private String position;
+    private Long companyId;
+    private String designation;
 
 }

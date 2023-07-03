@@ -1,6 +1,7 @@
 package com.chicmic.eNaukri.controller;
 
 import com.chicmic.eNaukri.Dto.ApiResponse;
+import com.chicmic.eNaukri.Dto.EmployerDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.Employer;
 import com.chicmic.eNaukri.model.Roles;
@@ -10,6 +11,7 @@ import com.chicmic.eNaukri.service.EmployerService;
 import com.chicmic.eNaukri.service.JobService;
 import com.chicmic.eNaukri.service.RolesService;
 
+import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -30,11 +32,10 @@ public class EmployerController {
     private final RolesService rolesService;
 
     @PostMapping("/signup")
-    public ApiResponse signup( String jsonString , @ModelAttribute MultipartFile userImg,
-                              @ModelAttribute MultipartFile companyImg) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        UsersDto usersDto = mapper.readValue(jsonString, UsersDto.class);
-        Employer employer = employerService.saveEmployer(usersDto, userImg, companyImg);
+    public ApiResponse signup(EmployerDto employerDto, @ModelAttribute MultipartFile userImg) throws IOException {
+        UsersDto usersDto = CustomObjectMapper.convertDtoToObject(employerDto, UsersDto.class);
+        usersDto.setEmployerProfile(CustomObjectMapper.convertDtoToObject(employerDto, Employer.class));
+        Employer employer = employerService.saveEmployer(usersDto, userImg);
         rolesService.addRoleToUser("EMPLOYER", employer.getUsers());
 
         return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );

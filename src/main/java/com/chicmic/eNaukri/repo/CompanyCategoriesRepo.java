@@ -2,7 +2,6 @@ package com.chicmic.eNaukri.repo;
 
 import com.chicmic.eNaukri.model.Company;
 import com.chicmic.eNaukri.model.CompanyCategories;
-import com.stripe.model.issuing.Cardholder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

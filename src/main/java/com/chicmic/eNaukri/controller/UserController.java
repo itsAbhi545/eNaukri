@@ -111,11 +111,11 @@ public class UserController {
     public String numApplicants(@PathVariable Long jobId){
         return String.valueOf(applicationService.getNumApplicantsForJob(jobId));
     }
-    @PostMapping("add-socialLinks/{userid}")
-    public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
-        linkService.addSocialLinks(userId, dto,null);
-        return ResponseEntity.ok("Added social links");
-    }
+//    @PostMapping("add-socialLinks/{userid}")
+//    public ResponseEntity<String> addSocialLinks(@PathVariable("userid") Long userId, @RequestBody SocialLinkDto dto){
+//        linkService.addSocialLinks(userId, dto,null);
+//        return ResponseEntity.ok("Added social links");
+//    }
 
     @DeleteMapping("delete-experience")
     public  ApiResponse delexp(Long expId){
@@ -128,8 +128,8 @@ public class UserController {
         return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
     @PostMapping("/create-profile")
-    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile) throws IOException {
-        UserProfile up=usersService.createProfile(dto, principal,imgFile);
+    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile,SocialLinkDto socialLinkDto) throws IOException {
+        UserProfile up=usersService.createProfile(dto, principal,imgFile,socialLinkDto);
         return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
     }
 
