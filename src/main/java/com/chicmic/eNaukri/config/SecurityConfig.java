@@ -3,6 +3,7 @@ package com.chicmic.eNaukri.config;
 import com.chicmic.eNaukri.filter.CustomAuthenticationFilter;
 import com.chicmic.eNaukri.filter.CustomAuthorizationFilter;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +31,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 public class SecurityConfig  {
 
     private final UserDetailsService userDetailsService;
-    @Autowired
-    private final UserServiceImpl userService;
+    private final UsersService usersService;
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(){
         DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
@@ -46,7 +46,7 @@ public class SecurityConfig  {
 
     //Filter objects
         CustomAuthenticationFilter authenticationFilter=
-                new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
+                new CustomAuthenticationFilter(usersService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
         authenticationFilter.setFilterProcessesUrl("/api/login");
 //        CustomAuthenticationFilter authenticationFilter1=
 //                new CustomAuthenticationFilter(userService,authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)));
@@ -62,11 +62,15 @@ public class SecurityConfig  {
         http.csrf(csrf->csrf.disable());
         http.sessionManagement(sessionManagement->sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     //permits
-        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/user/**").hasAnyAuthority("USER"));
-      //  http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/company/signup").permitAll());
-        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.anyRequest().permitAll());
+        http.authorizeHttpRequests(req->req.requestMatchers("/employer/signup").permitAll());
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/user/**").hasAuthority("USER"));
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/company/**").hasAuthority("COMPANY"));
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/employer/**").hasAuthority("EMPLOYER"));
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/admin/**").hasAuthority("ADMIN"));
+        http.authorizeHttpRequests(authorizeHttpRequests->authorizeHttpRequests.requestMatchers("/api/**").permitAll());
+
     //adding filters
-        http.addFilterBefore(new CustomAuthorizationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomAuthorizationFilter(usersService), UsernamePasswordAuthenticationFilter.class);
         http.addFilter(authenticationFilter);
 
     //building

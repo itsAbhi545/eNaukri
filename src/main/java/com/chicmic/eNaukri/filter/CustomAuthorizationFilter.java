@@ -4,8 +4,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.model.Authority;
+import com.chicmic.eNaukri.model.UserRole;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,36 +23,43 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
-    private UserServiceImpl userService;
+    private UsersService usersService;
 
-    public  CustomAuthorizationFilter(UserServiceImpl userService){
-        this.userService=userService;
+    public  CustomAuthorizationFilter(UsersService usersService){
+        this.usersService=usersService;
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println(request.getServletPath());
+        System.out.println("\u001B[35m" + request.getServletPath() + "\u001B[0m");
 
         if(request.getServletPath().contains("/user/")||(request.getServletPath().contains("/company/")
                 && !request.getServletPath().contains("/company/signup") && !request.getServletPath().contains("/company/search"))
 
         ){
-            String token=request.getHeader("Authorization").substring(7);
-            if(token==null || userService.findUserFromUUID(token)==null){
+            String token=request.getHeader("Authorization");
+            if(token==null || token.substring(7).isEmpty() || usersService.findUserFromUUID(token.substring(7))==null){
                 Map<String,String> error=new HashMap<>();
                 error.put("error_message","Please provide valid token");
                 response.setContentType(APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(),error);
             }
             else if(token!=null) {
+                token = token.substring(7);
                 String user = JWT.require(Algorithm.HMAC256(SECRET.getBytes()))
                         .build()
                         .verify(token)
                         .getSubject();
-                System.out.println(user+"/jefgegfyugeryfg");
-                Users temp= userService.getUserByEmail(user);
+                System.out.println("\u001B[35m" + user + "\u001B[0m");
+                System.out.println("/jefgegfyugeryfg");
+                Users temp= usersService.getUserByEmail(user);
+                List<UserRole> userRoleList = usersService.findRolesByUser(temp);
                 Collection<Authority> authorities=new ArrayList<>();
-                authorities.add(new Authority("USER"));
-
+                for (UserRole role : userRoleList) {
+                    authorities.add(new Authority(role.getRoleId().getRoleName()));
+                }
+                for(Authority authority : authorities) {
+                    System.out.println("\u001B[33m" + authority.getAuthority() + "\u001B[0m");
+                }
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=
                         new UsernamePasswordAuthenticationToken(temp.getEmail(),null,authorities);
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

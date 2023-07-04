@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -180,50 +181,61 @@ public class CompanyService {
     }
     public Company createCompanyProfile(Principal principal, String key, MultipartFile companyImg, SocialLinkDto dto, String date) throws IOException {
         Users user = usersService.getUserByEmail(principal.getName());
-        Company company= findCompanyByUser(user);
-        if(company==null){
-            throw new ApiException(HttpStatus.NOT_FOUND,"The user does not exist or isn't signed up as company");
+        Company company = findCompanyByUser(user);
+        try {
+            LocalDate localDate = date == null ? company.getFoundedIn() : LocalDate.parse(date);
+            if (company == null) {
+                throw new ApiException(HttpStatus.NOT_FOUND, "The user does not exist or isn't signed up as company");
+            }
+            if (localDate.isAfter(LocalDate.now())) {
+                throw new ApiException(HttpStatus.FORBIDDEN, "The date can't be in the future");
+            }
+            double count1 = 0;
+            if (key != null) {
+                count1++;
+            }
+            if (date != null) {
+                count1++;
+            }
+            if (companyImg != null) {
+                count1++;
+            }
+            double count2 = 0;
+            if (dto.getLinkedIn() != null) {
+                count2++;
+            }
+            if (dto.getTwitter() != null) {
+                count2++;
+            }
+            if (dto.getFacebook() != null) {
+                count2++;
+            }
+            System.out.println(count2 + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println(count1 + "???????????????????????????????");
+            double completePercentage = ((count1 + (count2 / 3)) / 4) * 20;
+            System.out.println(completePercentage);
+            company.setCompletionStatus(80 + completePercentage);
+            company.setFoundedIn(localDate);
+            company.setSize(employeeRange.getRange(key));
+            company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+            SocialLink sl = socialLinkRepo.findByUser(user);
+            if (sl == null) {
+                SocialLink socialLink = CustomObjectMapper.convertDtoToObject(dto, SocialLink.class);
+                socialLink.setUser(user);
+                user.setSocialLink(socialLink);
+                socialLinkRepo.save(socialLink);
+            } else {
+                sl.setTwitter(dto.getTwitter());
+                sl.setLinkedIn(dto.getLinkedIn());
+                sl.setFacebook(dto.getFacebook());
+                sl.setOthers(dto.getOthers());
+                socialLinkRepo.save(sl);
+            }
+            usersRepo.save(user);
+            companyRepo.save(company);
+            return company;
+        } catch (DateTimeParseException e) {
+            throw  new ApiException(HttpStatus.BAD_REQUEST, "Invalid Date Format");
         }
-        if(LocalDate.parse(date).isAfter(LocalDate.now())){
-            throw new ApiException(HttpStatus.FORBIDDEN,"The date can't be in the future");
-        }
-        double count1=0;
-        if(key!=null){count1++ ;}
-        if(date!=null){count1++;}
-        if(companyImg!=null){count1++;}
-        double count2=0;
-        if(dto.getLinkedIn()!=null){
-            count2++;
-        }
-        if(dto.getTwitter()!=null){
-            count2++;
-        }
-        if(dto.getFacebook()!=null){
-            count2++;
-        }
-        System.out.println(count2+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println(count1+"???????????????????????????????");
-        double completePercentage=((count1+(count2/3))/4)*20;
-        System.out.println(completePercentage);
-        company.setCompletionStatus(80+completePercentage);
-        company.setFoundedIn(LocalDate.parse(date));
-        company.setSize(employeeRange.getRange(key.trim()));
-        company.setPpPath(FileUploadUtil.imageUpload(companyImg));
-        SocialLink sl= socialLinkRepo.findByUser(user);
-        if(sl==null){
-        SocialLink socialLink = CustomObjectMapper.convertDtoToObject(dto, SocialLink.class);
-        socialLink.setUser(user);
-        user.setSocialLink(socialLink);
-        socialLinkRepo.save(socialLink);}
-        else{
-            sl.setTwitter(dto.getTwitter());
-            sl.setLinkedIn(dto.getLinkedIn());
-            sl.setFacebook(dto.getFacebook());
-            sl.setOthers(dto.getOthers());
-            socialLinkRepo.save(sl);
-        }
-        usersRepo.save(user);
-        companyRepo.save(company);
-        return company;
     }
 }

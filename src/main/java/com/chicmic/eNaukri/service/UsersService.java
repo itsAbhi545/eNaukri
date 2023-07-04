@@ -11,6 +11,7 @@ import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -41,10 +42,37 @@ public class UsersService {
     private final JavaMailSender javaMailSender;
     private final UserProfileRepo userProfileRepo;
     private final SkillsRepo skillsRepo;
+    private final UserTokenRepo tokenRepo;
     private final PreferenceRepo preferenceRepo;
     private final SocialLinkRepo socialLinkRepo;
+    private final RolesService rolesService;
     @Value("${serverAddress}")
     public    String serverAdd;
+
+    public void saveUUID(UserToken userToken) {
+        tokenRepo.save(userToken);
+    }
+
+    public String getModelByEmail(String username) {
+        return usersRepo.findByEmail(username).toString();
+    }
+    public void saveUser(Users user) {
+        usersRepo.save(user);
+    }
+
+    public Users findUserFromUUID(String token) {
+        UserToken userToken= tokenRepo.findByToken(token);
+        if(userToken==null){
+//            throw new ApiException(HttpStatus.BAD_REQUEST,"Null or invalid token.");
+            return null;
+        }
+//        return usersRepo.findById(userToken.getUserr().getUserId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+        return userToken.getUserr();
+    }
+    @Transactional
+    public void deleteToken(String uuid) {
+        tokenRepo.deleteUserTokenByToken(uuid);
+    }
 
 
     public Users getUserByEmail(String email) {
@@ -142,5 +170,9 @@ public class UsersService {
     }
     public List<UserProfile> searchUser(String query) {
         return userProfileRepo.findByQuery(query);
+    }
+
+    public List<UserRole> findRolesByUser(Users users) {
+        return rolesService.findUserRoleByUser(users);
     }
 }

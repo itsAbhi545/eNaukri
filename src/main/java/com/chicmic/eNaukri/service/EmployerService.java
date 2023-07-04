@@ -55,14 +55,16 @@ public class EmployerService {
     public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg) throws IOException, IllegalAccessException {
         Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
-        Company company = companyService.findByID(usersDto.getCompanyId());
+
         employer.setPpPath(FileUploadUtil.imageUpload(userImg));
         if (usersDto.getCompanyId() != null) {
+            Company company = companyService.findByID(usersDto.getCompanyId());
             Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
             employerSet.add(employer);
             company.setEmployerSet(employerSet);
             employer.setCompany(company);
         }
+        else {employer.setCompany(null);}
 
         Users users = new Users();
         BeanUtils.copyProperties(usersDto, users);

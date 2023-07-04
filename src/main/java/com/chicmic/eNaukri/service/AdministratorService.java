@@ -52,12 +52,13 @@ public class AdministratorService {
     }
     public void softDelete(Long userId){
         Users user= usersRepo.findById(userId).get();
-        UserRole userRole=rolesService.findUserRoleByUser(user);
-        if(userRole.isDeleted()){
-            userRole.setDeleted(false);
-        }
-        else{
-            userRole.setDeleted(true);
+        List<UserRole> userRoleList=rolesService.findUserRoleByUser(user);
+        for(UserRole userRole : userRoleList) {
+            if (userRole.isDeleted()) {
+                userRole.setDeleted(false);
+            } else {
+                userRole.setDeleted(true);
+            }
         }
     }
 //    public Users editProfile(Principal principal,){

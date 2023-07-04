@@ -38,7 +38,7 @@ public class FileUploadUtil {
     public static String imageUpload(MultipartFile resumeFile) throws IOException {
 
         String ppPath = null;
-        if (!resumeFile.isEmpty()) {
+        if (resumeFile != null && !resumeFile.isEmpty()) {
             String imgFolder = imagePath;
             byte[] imgFileBytes = resumeFile.getBytes();
             Path imgPath = Paths.get(imgFolder + resumeFile.getOriginalFilename());
