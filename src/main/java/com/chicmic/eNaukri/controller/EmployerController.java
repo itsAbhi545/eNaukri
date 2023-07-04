@@ -41,11 +41,10 @@ public class EmployerController {
         return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );
     }
     @PostMapping("/update")
-    public ApiResponse update(String jsonString , @ModelAttribute MultipartFile userImg,
-                              @ModelAttribute MultipartFile companyImg, Principal principal) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        UsersDto usersDto = mapper.readValue(jsonString, UsersDto.class);
-        Employer employer = employerService.updateEmployer(principal,usersDto, userImg, companyImg);
+    public ApiResponse update(EmployerDto employerDto, @ModelAttribute MultipartFile userImg, Principal principal) throws IOException {
+        UsersDto usersDto = CustomObjectMapper.convertDtoToObject(employerDto, UsersDto.class);
+        usersDto.setEmployerProfile(CustomObjectMapper.convertDtoToObject(employerDto, Employer.class));
+        Employer employer = employerService.updateEmployer(principal,usersDto, userImg);
         rolesService.addRoleToUser("EMPLOYER", employer.getUsers());
 
         return new ApiResponse( "User Register Successfully as Employer", employer, HttpStatus.CREATED );

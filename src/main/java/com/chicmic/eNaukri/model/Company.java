@@ -59,4 +59,22 @@ Company {
     private Set<Employer> employerSet =new HashSet<>();
 
 
+    public Company(Company company) {
+        this.companyId = company.getCompanyId();
+        this.name = company.getName();
+        this.foundedIn = company.getFoundedIn();
+        this.about = company.about;
+        this.ppPath = company.ppPath;
+        this.zipCode = company.zipCode;
+        this.address = company.address;
+        this.gstId = company.gstId;
+        this.iso = company.iso;
+        this.website = company.website;
+        this.approved = company.approved;
+        this.uuid = company.uuid;
+        this.size = company.size;
+        this.completionStatus = company.completionStatus;
+        this.users = company.users;
+        this.employerSet = company.employerSet;
+    }
 }

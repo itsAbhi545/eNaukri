@@ -1,0 +1,36 @@
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="key"
+Content-Length: 4
+
+1-50
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="companyImg"
+Content-Length: 0
+
+
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="foundedIn"
+Content-Length: 10
+
+2022-12-25
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="linkedIn"
+Content-Length: 33
+
+https://linkedin.com/in/karllorey
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="twitter"
+Content-Length: 29
+
+http://twitter.com/@karllorey
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="facebook"
+Content-Length: 30
+
+http://facebook.com/@karllorey
+--d2576074-1a34-49c5-b410-1df97ffb0a6b
+Content-Disposition: form-data; name="others"
+Content-Length: 0
+
+
+--d2576074-1a34-49c5-b410-1df97ffb0a6b--

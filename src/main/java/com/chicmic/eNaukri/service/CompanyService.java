@@ -7,6 +7,7 @@ import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
+import com.chicmic.eNaukri.util.UpdatedFields;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -179,9 +180,10 @@ public class CompanyService {
     public List<Company> searchCompany(String query, String location, List<Long> categoryIds){
         return companyCategoriesRepo.searchCompanyAndCategory(companyRepo.findCompanyByQuery(query, location), categoryIds);
     }
-    public Company createCompanyProfile(Principal principal, String key, MultipartFile companyImg, SocialLinkDto dto, String date) throws IOException {
+    public HashMap<String, Object> createCompanyProfile(Principal principal, String key, MultipartFile companyImg, SocialLinkDto dto, String date) throws IOException {
         Users user = usersService.getUserByEmail(principal.getName());
         Company company = findCompanyByUser(user);
+        Company beforeUpdateCompany = new Company(company);
         try {
             LocalDate localDate = date == null ? company.getFoundedIn() : LocalDate.parse(date);
             if (company == null) {
@@ -232,10 +234,16 @@ public class CompanyService {
                 socialLinkRepo.save(sl);
             }
             usersRepo.save(user);
-            companyRepo.save(company);
-            return company;
+            company = companyRepo.save(company);
+            List<String> updateFields = UpdatedFields.findUpdatedFields(beforeUpdateCompany,company);
+            HashMap<String, Object> companyResponse =  new HashMap<>();
+            companyResponse.put("updated Fields", updateFields);
+            companyResponse.put("company", company);
+            return companyResponse;
         } catch (DateTimeParseException e) {
-            throw  new ApiException(HttpStatus.BAD_REQUEST, "Invalid Date Format");
+            throw  new ApiException(HttpStatus.BAD_REQUEST, "Invalid Date Format(Date Format is : YYYY-MM-DD)");
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 }

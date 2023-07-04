@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 
 @RestController
-//@RequestMapping("/")
+@RequestMapping("/api/")
 @RequiredArgsConstructor
 public class HomeController {
     //abhijeet
@@ -42,20 +42,8 @@ public class HomeController {
     private final CategoriesService categoriesService;
 
 
-    @GetMapping
-    public String homePage(){
-        System.out.println("1");
-        return "In Home Page";
-    }
-    //    @GetMapping("login-page")
-//    public String loginPage(){
-//        return "in Login Page";
-//    }
-//    @PostMapping("login")
-//    public String userLogin(@RequestBody Map<Object,Object> map){
-//        return "login successful";
-//    }
-    @PostMapping("/api/signup")
+
+    @PostMapping("signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse register(@Valid Users dto) {
         Users user=usersService.register(dto);

@@ -21,10 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/company/")
@@ -108,16 +105,15 @@ public class CompanyController {
     }
     @PostMapping("create-profile")
     public ApiResponse createCompanyProfile(Principal principal, SocialLinkDto dto, String key, @RequestParam(required = false) MultipartFile companyImg, String foundedIn) throws IOException {
-        Company company=companyService.createCompanyProfile(principal, key,companyImg,dto,foundedIn);
-
-        return new ApiResponse("Created profile",company, HttpStatus.OK);
+        HashMap<String, Object> companyResponse =companyService.createCompanyProfile(principal, key,companyImg,dto,foundedIn);
+        return new ApiResponse("Created profile",companyResponse, HttpStatus.OK);
     }
     @PostMapping("update-profile")
     public ApiResponse updateCompanyProfile(Principal principal,SocialLinkDto dto, Company company, String foundedIn, @RequestParam MultipartFile companyImg,String key) throws IOException {
         return new ApiResponse("details updated",companyService.updateCompany(company,dto,principal,companyImg,key,foundedIn),HttpStatus.OK);
     }
     @GetMapping("login-details")
-    public ResponseEntity<?> logincheck(Principal principal){
+    public ResponseEntity<?> loginCheck(Principal principal){
         return ResponseEntity.ok(companyService.findCompanyByUser(userService.loginResponse(principal)));
     }
 

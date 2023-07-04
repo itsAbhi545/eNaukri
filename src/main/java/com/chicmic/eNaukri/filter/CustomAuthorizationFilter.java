@@ -60,6 +60,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 for(Authority authority : authorities) {
                     System.out.println("\u001B[33m" + authority.getAuthority() + "\u001B[0m");
                 }
+                System.out.println("\u001B[33m" + request.getAuthType() + "\u001B[0m");
+
+
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=
                         new UsernamePasswordAuthenticationToken(temp.getEmail(),null,authorities);
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);

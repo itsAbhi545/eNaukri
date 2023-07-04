@@ -5,6 +5,7 @@ import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import com.chicmic.eNaukri.util.CompletionStatus;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -32,26 +33,6 @@ public class EmployerService {
 
     private final ApplicationRepo applicationRepo;
 
-    public Double checkCompletionStatus(Object obj) throws IllegalAccessException {
-        Long nullFields = 0L;
-        Long total = 0L;
-        for (Field field : obj.getClass().getDeclaredFields()){
-            if((field.getType() == String.class || field.getType() == Long.class ) && !field.getName().equals("id")) {
-                field.setAccessible(true);
-                System.out.println("\u001B[35m" + field.getName() + ": " + field.get(obj) + "\u001B[0m");
-                if (field.get(obj) == null || field.get(obj).equals("")) {
-                    nullFields++;
-                }
-                total++;
-            }
-        }
-        System.out.println("\u001B[35m" + nullFields + " : " + total + "\u001B[0m");
-
-
-        return (double) (((total - nullFields) * 100)/total);
-    }
-
-
     public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg) throws IOException, IllegalAccessException {
         Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
@@ -71,11 +52,11 @@ public class EmployerService {
         employer.setUsers(users);
         usersService.register(users);
         employer = employerRepo.save(employer);
-        employer.setCompletionStatus(checkCompletionStatus(employer));
+        employer.setCompletionStatus(CompletionStatus.calCompletionStatus(employer));
         employer = employerRepo.save(employer);
         return employer;
     }
-    public Employer updateEmployer(Principal principal,UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
+    public Employer updateEmployer(Principal principal,UsersDto usersDto, MultipartFile userImg) throws IOException {
         Employer employer = findByUsers(usersService.getUserByEmail(principal.getName()));
         if(employer == null || !employer.equals(usersDto.getEmployerProfile())){
             throw new ApiException(HttpStatus.BAD_REQUEST, "Employer does not exist");
@@ -87,7 +68,7 @@ public class EmployerService {
             employerSet.add(employer);
             company.setEmployerSet(employerSet);
             employer.setCompany(company);
-            company.setPpPath(FileUploadUtil.imageUpload(companyImg));
+
         }
         employer.setPpPath(FileUploadUtil.imageUpload(userImg));
         Users users = new Users();
