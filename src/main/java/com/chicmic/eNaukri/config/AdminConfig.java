@@ -5,6 +5,7 @@ import com.chicmic.eNaukri.model.UserRole;
 import com.chicmic.eNaukri.model.Users;
 import com.chicmic.eNaukri.service.RolesService;
 import com.chicmic.eNaukri.service.UserServiceImpl;
+import com.chicmic.eNaukri.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class AdminConfig {
-    private final UserServiceImpl userService;
+    private final UsersService userService;
     private final RolesService rolesService;
     @Bean
     public void createAdmin(){

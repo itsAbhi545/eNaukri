@@ -38,7 +38,7 @@ import java.util.Optional;
 
         ObjectMapper mapper = CustomObjectMapper.createObjectMapper();
         Education education = mapper.convertValue(dto, Education.class);
-        education.setExId((educationRepo.findByDegree(dto.getDegree()) == null ? null : education.getExId()));
+//        education.setEdId((educationRepo.findByDegree(dto.getDegree()) == null ? null : education.getEdId()));
         if(education.getEndOn().isBefore(LocalDate.now())){
             education.setStudent(false);
         }

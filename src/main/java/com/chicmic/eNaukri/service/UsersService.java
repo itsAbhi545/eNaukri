@@ -46,8 +46,8 @@ public class UsersService {
     private final PreferenceRepo preferenceRepo;
     private final SocialLinkRepo socialLinkRepo;
     private final RolesService rolesService;
-    @Value("${serverAddress}")
-    public    String serverAdd;
+//    @Value("${serverAddress}")
+//    public    String serverAdd;
 
     public void saveUUID(UserToken userToken) {
         tokenRepo.save(userToken);
@@ -95,7 +95,7 @@ public class UsersService {
             throw new ApiException(HttpStatus.NOT_FOUND,"No user by this email, consider signing up");
         }
         String token = JwtUtils.createJwtToken(user.getUuid());
-        String link = serverAdd + "/eNaukri/verify/"+token+"/"+user.getUuid();
+        String link =  "/localhost:8081/eNaukri/verify/"+token+"/"+user.getUuid();
         String to= user.getEmail();
         String subject="eNaukri job portal - Verify your account";
         String body="Click the link to verify your account " +link;
