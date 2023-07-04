@@ -1,13 +1,11 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.chicmic.eNaukri.Dto.SocialLinkDto;
 import com.chicmic.eNaukri.Dto.UserProfileDto;
 import com.chicmic.eNaukri.Dto.UsersDto;
 import com.chicmic.eNaukri.model.*;
-import com.chicmic.eNaukri.repo.PreferenceRepo;
-import com.chicmic.eNaukri.repo.SkillsRepo;
-import com.chicmic.eNaukri.repo.UserProfileRepo;
-import com.chicmic.eNaukri.repo.UsersRepo;
+import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.CustomObjectMapper;
 import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.chicmic.eNaukri.util.JwtUtils;
@@ -43,6 +41,7 @@ public class UsersService {
     private final UserProfileRepo userProfileRepo;
     private final SkillsRepo skillsRepo;
     private final PreferenceRepo preferenceRepo;
+    private final SocialLinkRepo socialLinkRepo;
 
 
     public Users getUserByEmail(String email) {
@@ -134,11 +133,6 @@ public class UsersService {
         userProfileRepo.save(userProfile);
         return userProfile;
     }
-    public Preference createPreferences(Principal principal, Preference preference){
-        Users user=usersRepo.findByEmail(principal.getName());
-        Preference preference1=preferenceRepo.save(preference);
-        preference1.setUserPreferences(getUserProfile(user));
-        return preference1;
     public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile)
             throws IOException{
         Users user = usersRepo.findByEmail(principal.getName());

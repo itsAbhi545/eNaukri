@@ -153,6 +153,7 @@ public class SubscriptionController {
         switch (event.getType()) {
             case "customer.subscription.deleted":
                 subscription = (Subscription) stripeObject;
+                subscription.getMetadata();
                 // Then define and call a function to handle the event
                 // customer.subscription.deleted
                 // handleSubscriptionTrialEnding(subscription);

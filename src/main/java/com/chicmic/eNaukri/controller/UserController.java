@@ -80,8 +80,8 @@ public class UserController {
     }
     @PostMapping("apply/{jobId}")
     public ResponseEntity<String> apply(Principal principal, @PathVariable("jobId") Long jobId,
-                                        ApplicationDto application) throws MessagingException, IOException {
-        applicationService.applyForJob(application,principal,jobId);
+                                        ApplicationDto application,MultipartFile resumeFile) throws MessagingException, IOException {
+        applicationService.applyForJob(application,principal,jobId,resumeFile);
         return ResponseEntity.ok("Successfully applied to the job");
     }
     @GetMapping("unsubscribe/{id}")
