@@ -1,5 +1,6 @@
 package com.chicmic.eNaukri.util;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,11 +11,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
+@Log4j
 public class FileUploadUtil {
-    @Value("${my.cvPath.string}")
+    @Value("${cvPath}")
    public static  String resumePath;
-    @Value("${my.imagePath.string}")
-   public  static String imagePath;
+    public static String imagePath;
+
+    @Value("${imagePath}")
+    public void setNameStatic(String imagePath){
+        FileUploadUtil.imagePath = imagePath;
+    }
+
 
     public static  String resumeUpload(MultipartFile resumeFile) throws IOException {
         String cvPath = null;
@@ -29,11 +36,13 @@ public class FileUploadUtil {
     }
 
     public static String imageUpload(MultipartFile resumeFile) throws IOException {
+
         String ppPath = null;
-        if (!resumeFile.isEmpty()) {
+        if (resumeFile != null && !resumeFile.isEmpty()) {
             String imgFolder = imagePath;
             byte[] imgFileBytes = resumeFile.getBytes();
             Path imgPath = Paths.get(imgFolder + resumeFile.getOriginalFilename());
+            log.error("Image Path: " + imgPath + " " + imagePath);
             Files.write(imgPath, imgFileBytes);
             ppPath = "/static/assets/files/" + resumeFile.getOriginalFilename();
         }

@@ -32,7 +32,7 @@ public class EmployerController {
     private final RolesService rolesService;
 
     @PostMapping("/signup")
-    public ApiResponse signup(EmployerDto employerDto, @ModelAttribute MultipartFile userImg) throws IOException {
+    public ApiResponse signup(EmployerDto employerDto, @ModelAttribute MultipartFile userImg) throws IOException, IllegalAccessException {
         UsersDto usersDto = CustomObjectMapper.convertDtoToObject(employerDto, UsersDto.class);
         usersDto.setEmployerProfile(CustomObjectMapper.convertDtoToObject(employerDto, Employer.class));
         Employer employer = employerService.saveEmployer(usersDto, userImg);

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -122,14 +123,16 @@ public class UserController {
         experienceService.deleteExperience(expId);
         return  new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
+
     @DeleteMapping("delete-education")
     public ApiResponse deled(Long edId){
         educationService.deleteEducation(edId);
         return new ApiResponse("deleted",null,HttpStatus.valueOf(204));
     }
+
     @PostMapping("/create-profile")
-    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile,SocialLinkDto socialLinkDto) throws IOException {
-        UserProfile up=usersService.createProfile(dto, principal,imgFile,socialLinkDto);
+    public ApiResponse makeProfile(Principal principal, @RequestBody UserProfileDto dto,MultipartFile imgFile) throws IOException {
+        UserProfile up=usersService.createProfile(dto, principal,imgFile,dto.getSocialLinkDto());
         return new ApiResponse("Profile has been set",up,HttpStatus.CREATED);
     }
 

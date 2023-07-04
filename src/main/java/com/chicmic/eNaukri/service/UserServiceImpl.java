@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -45,33 +46,7 @@ public class UserServiceImpl implements UserDetailsService {
     @Autowired
     JavaMailSender javaMailSender;
 
-    public void saveUUID(UserToken userToken) {
-        tokenRepo.save(userToken);
-    }
 
-    public Users getUserByEmail(String username) {
-        return usersRepo.findByEmail(username);
-    }
-    public String getModelByEmail(String username) {
-        return usersRepo.findByEmail(username).toString();
-    }
-    public void saveUser(Users user) {
-        usersRepo.save(user);
-    }
-
-    public Users findUserFromUUID(String token) {
-        UserToken userToken= tokenRepo.findByToken(token);
-        if(userToken==null){
-//            throw new ApiException(HttpStatus.BAD_REQUEST,"Null or invalid token.");
-            return null;
-        }
-//        return usersRepo.findById(userToken.getUserr().getUserId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-    return userToken.getUserr();
-    }
-    @Transactional
-    public void deleteToken(String uuid) {
-        tokenRepo.deleteUserTokenByToken(uuid);
-    }
 
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -98,16 +73,20 @@ public class UserServiceImpl implements UserDetailsService {
         if(companyService.findCompanyByUser(user)!=null&&!companyService.findCompanyByUser(user).isApproved()){
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"Company needs to be approved by the admin before login");
         }
-        UserRole userRole = rolesService.findUserRoleByUser(user);
-        if(userRole.isDeleted()){
-            throw new ApiException(HttpStatus.UNAUTHORIZED,"User is Deleted");
+        List<UserRole> userRoleList = rolesService.findUserRoleByUser(user);
+        for(UserRole userRole : userRoleList) {
+            if (userRole.isDeleted()) {
+                throw new ApiException(HttpStatus.UNAUTHORIZED, "User is Deleted");
+            }
         }
         Collection<Authority> authorities=new ArrayList<>();
-        authorities.add(new Authority("ROLE_" + userRole.getRoleId().getRoleName()));
+        for(UserRole userRole : userRoleList) {
+            authorities.add(new Authority("ROLE_" + userRole.getRoleId().getRoleName()));
+        }
         return new User(user.getEmail(),user.getPassword(),authorities);
     }
     public Users loginResponse(Principal principal){
-        Users  user= getUserByEmail(principal.getName());
+        Users  user= usersRepo.findByEmail(principal.getName());
         return user;
     }
 

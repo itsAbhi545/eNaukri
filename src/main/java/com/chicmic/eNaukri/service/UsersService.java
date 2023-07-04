@@ -11,9 +11,12 @@ import com.chicmic.eNaukri.util.FileUploadUtil;
 import com.chicmic.eNaukri.util.JwtUtils;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +30,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static com.chicmic.eNaukri.ENaukriApplication.passwordEncoder;
@@ -40,17 +42,44 @@ public class UsersService {
     private final JavaMailSender javaMailSender;
     private final UserProfileRepo userProfileRepo;
     private final SkillsRepo skillsRepo;
+    private final UserTokenRepo tokenRepo;
     private final PreferenceRepo preferenceRepo;
     private final SocialLinkRepo socialLinkRepo;
+    private final RolesService rolesService;
+    @Value("${serverAddress}")
+    public    String serverAdd;
+
+    public void saveUUID(UserToken userToken) {
+        tokenRepo.save(userToken);
+    }
+
+    public String getModelByEmail(String username) {
+        return usersRepo.findByEmail(username).toString();
+    }
+    public void saveUser(Users user) {
+        usersRepo.save(user);
+    }
+
+    public Users findUserFromUUID(String token) {
+        UserToken userToken= tokenRepo.findByToken(token);
+        if(userToken==null){
+//            throw new ApiException(HttpStatus.BAD_REQUEST,"Null or invalid token.");
+            return null;
+        }
+//        return usersRepo.findById(userToken.getUserr().getUserId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,"User doesn't exist"));
+        return userToken.getUserr();
+    }
+    @Transactional
+    public void deleteToken(String uuid) {
+        tokenRepo.deleteUserTokenByToken(uuid);
+    }
 
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
     public Users getUserByUuid(String uuid) { return usersRepo.findByUuid(uuid); }
-
     public Users getUserById(Long userId){return usersRepo.findByUserId(userId);}
-
 
     public Users register(Users newUser) {
         String uuid= UUID.randomUUID().toString();
@@ -66,20 +95,17 @@ public class UsersService {
             throw new ApiException(HttpStatus.NOT_FOUND,"No user by this email, consider signing up");
         }
         String token = JwtUtils.createJwtToken(user.getUuid());
-        String link = "http://localhost:8081/eNaukri/verify/"+token+"/"+user.getUuid();
+        String link = serverAdd + "/eNaukri/verify/"+token+"/"+user.getUuid();
         String to= user.getEmail();
         String subject="eNaukri job portal - Verify your account";
         String body="Click the link to verify your account " +link;
-        sendEmail(to,subject,body);
+//        sendEmail(to,subject,body);
     }
     public void verifyUserAccount(String token, String uuid){
         String decodedToken = JwtUtils.verifyJwtToken(token);
         Users user= usersRepo.findByUuid(uuid);
-        if(decodedToken==uuid){
+        if(decodedToken.equals(uuid)){
             user.setVerified(true);
-        }
-        else{
-            throw new ApiException(HttpStatus.FORBIDDEN,"The token has expired consider making a new request");
         }
     }
 
@@ -133,48 +159,20 @@ public class UsersService {
         userProfileRepo.save(userProfile);
         return userProfile;
     }
-    public UserProfile createProfile(UserProfileDto dto, Principal principal, MultipartFile imgFile)
-            throws IOException{
-        Users user = usersRepo.findByEmail(principal.getName());
-        UserProfile userProfile= CustomObjectMapper.convertDtoToObject(dto, UserProfile.class);
-        userProfile.setUsers(user);
-        userProfile.setPpPath(FileUploadUtil.imageUpload(imgFile));
-        List<UserSkills> userSkillsList=new ArrayList<>();
-        for (Long skillId : dto.getSkillsList()) {
-            Skills skill = skillsRepo.findById(skillId).orElse(null);
-            UserSkills userSkills = UserSkills.builder().skills(skill).userProfile(userProfile).build();
-            if (skill != null) {
-                userSkillsList.add(userSkills);
-            }
-        }
-        for(Education ed:userProfile.getEducationList()){
-            ed.setEdUser(userProfile);
-        }
-        for(Experience ex:userProfile.getExperienceList()){
-            ex.setExpUser(userProfile);
-        }
-        userProfile.getPreference().setUserPreferences(userProfile);
-        userProfile.setUserSkillsList(userSkillsList);
-        userProfile.setUsers(user);
-        userProfileRepo.save(userProfile);
-        return userProfile;
-    }
     public Preference createPreferences(Principal principal, Preference preference){
         Users user=usersRepo.findByEmail(principal.getName());
         Preference preference1=preferenceRepo.save(preference);
         preference1.setUserPreferences(getUserProfile(user));
         return preference1;
     }
-    public Preference updatePreferences(Principal principal, Preference preference){
-        Users user=usersRepo.findByEmail(principal.getName());
-        Preference oldPreferences=getUserProfile(user).getPreference();
-        oldPreferences=preference;
-        return oldPreferences;
-    }
     public UserProfile getUserProfile(Users users) {
         return userProfileRepo.findUserProfileByUsers(users);
     }
     public List<UserProfile> searchUser(String query) {
         return userProfileRepo.findByQuery(query);
+    }
+
+    public List<UserRole> findRolesByUser(Users users) {
+        return rolesService.findUserRoleByUser(users);
     }
 }

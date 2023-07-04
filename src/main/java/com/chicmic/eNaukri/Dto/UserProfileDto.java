@@ -24,4 +24,5 @@ public class UserProfileDto {
     private List<Education> educationList;
     private List<Long> skillsList;
     private List<Experience> experienceList;
+    private SocialLinkDto socialLinkDto;
 }

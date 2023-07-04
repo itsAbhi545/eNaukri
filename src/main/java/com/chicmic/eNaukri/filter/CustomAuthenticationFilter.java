@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.service.UserServiceImpl;
-import com.chicmic.eNaukri.util.JwtUtils;
+import com.chicmic.eNaukri.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
@@ -45,11 +45,11 @@ import static org.apache.hadoop.util.VersionInfo.getUser;
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
-    private UserServiceImpl userService;
+    private UsersService usersService;
 
 
-    public CustomAuthenticationFilter(UserServiceImpl userService, AuthenticationManager authenticationManager) {
-        this.userService=userService;
+    public CustomAuthenticationFilter(UsersService usersService, AuthenticationManager authenticationManager) {
+        this.usersService=usersService;
         this.authenticationManager=authenticationManager;
     }
 
@@ -74,12 +74,15 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 //        Collection<Authority> authorities=new ArrayList<>();
 //        authorities.add(new Authority("USER"));
 
-        Users loggedInUser=userService.getUserByEmail(authResult.getName());
-        String token = JwtUtils.createJwtToken(((User) authResult.getPrincipal()).getUsername());
+        Users loggedInUser=usersService.getUserByEmail(authResult.getName());
+        String token = JWT.create()
+                .withSubject(((User) authResult.getPrincipal()).getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .sign(Algorithm.HMAC256(SECRET.getBytes()));
         UserToken userToken=UserToken.builder().userr(loggedInUser).token(token).build();
 
     // saving uuid & updating cookies
-        userService.saveUUID(userToken);
+        usersService.saveUUID(userToken);
 
         Map<String,String> hashMap=new HashMap<>();
         hashMap.put("token",token);

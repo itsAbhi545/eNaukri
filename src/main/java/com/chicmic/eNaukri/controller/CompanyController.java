@@ -11,6 +11,7 @@ import com.chicmic.eNaukri.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
@@ -40,8 +41,6 @@ public class CompanyController {
     private final SocialLinkService linkService;
     private final UsersService usersService;
 
-
-
     @GetMapping("{id}")
     public Company companyPage(@PathVariable Long id){
         return companyRepo.findById(id).get();
@@ -53,7 +52,7 @@ public class CompanyController {
     @PostMapping("postJob")
     public ApiResponse postJob(@RequestBody JobDto jobDto, Principal principal){
 
-        Employer employer = employerService.findByUsers(userService.getUserByEmail(principal.getName()));
+        Employer employer = employerService.findByUsers(usersService.getUserByEmail(principal.getName()));
         Job job = jobService.saveJob(jobDto, employer);
         return new ApiResponse("Job successfully posted", job, HttpStatus.CREATED);
     }
@@ -101,15 +100,16 @@ public class CompanyController {
                               Principal principal
     ) {
         if(location.equals("") && principal != null){
-            Users user = userService.getUserByEmail(principal.getName());
+            Users user = usersService.getUserByEmail(principal.getName());
             location = usersService.getUserProfile(user).getPreference().getLocation();
         }
         List<Company> companyList = companyService.searchCompany(query, location, categoryIds);
         return new ApiResponse("Search Result Successfully Generated for the query", companyList, HttpStatus.OK);
     }
     @PostMapping("create-profile")
-    public ApiResponse createCompanyProfile(Principal principal, SocialLinkDto dto, String key, @RequestParam(required = true) MultipartFile companyImg, String foundedIn) throws IOException {
+    public ApiResponse createCompanyProfile(Principal principal, SocialLinkDto dto, String key, @RequestParam(required = false) MultipartFile companyImg, String foundedIn) throws IOException {
         Company company=companyService.createCompanyProfile(principal, key,companyImg,dto,foundedIn);
+
         return new ApiResponse("Created profile",company, HttpStatus.OK);
     }
     @PostMapping("update-profile")

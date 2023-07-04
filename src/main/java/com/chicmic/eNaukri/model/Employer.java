@@ -26,6 +26,7 @@ Employer {
     private String designation;
 
     private String ppPath;
+    private Double completionStatus;
 
 //    @Column(columnDefinition = "boolean default false")
      @Column(columnDefinition = "BIT DEFAULT 0")

@@ -1,13 +1,17 @@
 package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
+import com.chicmic.eNaukri.Dto.CategoriesDto;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
+import com.chicmic.eNaukri.util.CustomObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service@RequiredArgsConstructor
 public class AdministratorService {
@@ -31,8 +35,11 @@ public class AdministratorService {
             company.setApproved(true);
         }
     }
-    public Categories createCategories(Categories dto){
-        Categories categories =categoriesRepo.save(dto);
+    public Categories createCategories(CategoriesDto dto){
+        Set<Skills> skillsList = dto.getCategorySkills().stream().map(skillId -> skillsRepo.findById(skillId).orElse(null)).collect(Collectors.toSet());
+        Categories categories = Categories.builder().name(dto.getName()).categorySkills(skillsList).build();
+        categories = categoriesRepo.save(categories);
+
         return categories;
     }
     public Skills createSkills(Skills dto){
@@ -45,12 +52,13 @@ public class AdministratorService {
     }
     public void softDelete(Long userId){
         Users user= usersRepo.findById(userId).get();
-        UserRole userRole=rolesService.findUserRoleByUser(user);
-        if(userRole.isDeleted()){
-            userRole.setDeleted(false);
-        }
-        else{
-            userRole.setDeleted(true);
+        List<UserRole> userRoleList=rolesService.findUserRoleByUser(user);
+        for(UserRole userRole : userRoleList) {
+            if (userRole.isDeleted()) {
+                userRole.setDeleted(false);
+            } else {
+                userRole.setDeleted(true);
+            }
         }
     }
 //    public Users editProfile(Principal principal,){

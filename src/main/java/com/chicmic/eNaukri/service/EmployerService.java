@@ -2,6 +2,7 @@ package com.chicmic.eNaukri.service;
 
 import com.chicmic.eNaukri.CustomExceptions.ApiException;
 import com.chicmic.eNaukri.Dto.UsersDto;
+import com.chicmic.eNaukri.TrimNullValidator.TrimAll;
 import com.chicmic.eNaukri.model.*;
 import com.chicmic.eNaukri.repo.*;
 import com.chicmic.eNaukri.util.FileUploadUtil;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,25 +29,51 @@ public class EmployerService {
     private final EmployerRepo employerRepo;
     private final UsersRepo usersRepo;
     private final JobRepo jobRepo;
+
     private final ApplicationRepo applicationRepo;
 
+    public Double checkCompletionStatus(Object obj) throws IllegalAccessException {
+        Long nullFields = 0L;
+        Long total = 0L;
+        for (Field field : obj.getClass().getDeclaredFields()){
+            if((field.getType() == String.class || field.getType() == Long.class ) && !field.getName().equals("id")) {
+                field.setAccessible(true);
+                System.out.println("\u001B[35m" + field.getName() + ": " + field.get(obj) + "\u001B[0m");
+                if (field.get(obj) == null || field.get(obj).equals("")) {
+                    nullFields++;
+                }
+                total++;
+            }
+        }
+        System.out.println("\u001B[35m" + nullFields + " : " + total + "\u001B[0m");
 
-    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg) throws IOException {
+
+        return (double) (((total - nullFields) * 100)/total);
+    }
+
+
+    public Employer saveEmployer(UsersDto usersDto, MultipartFile userImg) throws IOException, IllegalAccessException {
         Employer employer = usersDto.getEmployerProfile();
         employer.setIsApproved(false);
-        Company company = companyService.findByID(usersDto.getCompanyId());
-        employer.setPpPath(FileUploadUtil.imageUpload(userImg));
-//        company.setPpPath(FileUploadUtil.imageUpload(companyImg));
 
-        Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
-        employerSet.add(employer);
-        company.setEmployerSet(employerSet);
-        employer.setCompany(company);
+        employer.setPpPath(FileUploadUtil.imageUpload(userImg));
+        if (usersDto.getCompanyId() != null) {
+            Company company = companyService.findByID(usersDto.getCompanyId());
+            Set<Employer> employerSet = companyService.findEmployerById(usersDto.getCompanyId());
+            employerSet.add(employer);
+            company.setEmployerSet(employerSet);
+            employer.setCompany(company);
+        }
+        else {employer.setCompany(null);}
+
         Users users = new Users();
         BeanUtils.copyProperties(usersDto, users);
         employer.setUsers(users);
         usersService.register(users);
-        return employerRepo.save(employer);
+        employer = employerRepo.save(employer);
+        employer.setCompletionStatus(checkCompletionStatus(employer));
+        employer = employerRepo.save(employer);
+        return employer;
     }
     public Employer updateEmployer(Principal principal,UsersDto usersDto, MultipartFile userImg, MultipartFile companyImg) throws IOException {
         Employer employer = findByUsers(usersService.getUserByEmail(principal.getName()));

@@ -8,6 +8,8 @@ import com.chicmic.eNaukri.repo.UserRoleRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RolesService {
@@ -24,7 +26,7 @@ public class RolesService {
     public UserRole saveUserRole(UserRole userRole) {
         return userRoleRepo.save(userRole);
     }
-    public UserRole findUserRoleByUser(Users user) {
+    public List<UserRole> findUserRoleByUser(Users user) {
         return userRoleRepo.findByUserId(user);
     }
 
